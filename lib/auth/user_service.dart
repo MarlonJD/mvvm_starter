@@ -59,6 +59,10 @@ class UserService {
     return user;
   }
 
+  bool isLoggedIn() {
+    return userNotifier.value != null;
+  }
+
   User? sessionExists() {
     const query = "SELECT * FROM sessions";
     final result = _databaseAbstraction.dbSelect(query);

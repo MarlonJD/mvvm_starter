@@ -1,10 +1,9 @@
 import "package:flutter/material.dart";
-import "package:mvvm_starter/auth/login_view.dart";
 import "package:mvvm_starter/auth/user_service.dart";
 import "package:mvvm_starter/core/database_abstract.dart";
 import "package:mvvm_starter/core/hive_abstract.dart";
 import "package:mvvm_starter/core/locator.dart";
-import "package:mvvm_starter/pages/home/home_view.dart";
+import "package:mvvm_starter/route.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,20 +37,14 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: RouterService(
+        userService: userService,
+      ).router,
       title: "Flutter Demo",
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-      ),
-      home: ValueListenableBuilder(
-        valueListenable: userService.userNotifier,
-        builder: (context, user, child) {
-          if (user == null) {
-            return const LoginView();
-          }
-          return const HomeView();
-        },
       ),
     );
   }
