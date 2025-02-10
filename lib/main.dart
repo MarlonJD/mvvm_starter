@@ -1,3 +1,4 @@
+import "package:easy_localization/easy_localization.dart";
 import "package:flutter/material.dart";
 import "package:mvvm_starter/auth/user_service.dart";
 import "package:mvvm_starter/core/database_abstract.dart";
@@ -7,6 +8,7 @@ import "package:mvvm_starter/route.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   setupLocator();
 
   await locator<DatabaseAbstraction>().openDatabaseWithTables(
@@ -21,7 +23,14 @@ void main() async {
 
   await locator<HiveDatabaseAbstraction>().initHiveDatabase();
 
-  runApp(const MyApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale("en", "US"), Locale("tr", "TR")],
+      path: "assets/translations",
+      fallbackLocale: const Locale("en", "US"),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -38,6 +47,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       routerConfig: RouterService(
         userService: userService,
       ).router,

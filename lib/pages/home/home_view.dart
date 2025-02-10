@@ -1,3 +1,4 @@
+import "package:easy_localization/easy_localization.dart";
 import "package:flutter/material.dart";
 import "package:mvvm_starter/auth/user_service.dart";
 import "package:mvvm_starter/core/database_view.dart";
@@ -44,7 +45,11 @@ class _HomeViewState extends State<HomeView> {
               valueListenable: homeViewModel.userNotifier,
               builder: (context, user, child) {
                 return Text(
-                  "Welcome ${user?.name}",
+                  "Welcome, {}".tr(
+                    args: [
+                      "${user?.name}",
+                    ],
+                  ),
                   style: Theme.of(context).textTheme.headlineLarge,
                 );
               },
