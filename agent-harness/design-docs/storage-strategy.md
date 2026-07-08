@@ -9,6 +9,13 @@ of mixing persistence systems. Users, auth sessions, and future domain records
 belong in the Drift database. The database schema, migrations, and constraints
 must be owned by the database layer, not by app startup code or Views.
 
+Drift/SQLite is not the default storage choice for every content feature. Use
+it when a feature needs durable local domain state, offline-first behavior,
+relational queries, local search/filtering at scale, sync boundaries, schema
+constraints, or migrations. If a feature only reads remote content and does not
+need offline behavior, its repository can depend on a remote data source without
+adding a Drift table.
+
 ## Boundaries
 
 Store these in Drift/SQLite:
@@ -17,6 +24,10 @@ Store these in Drift/SQLite:
 - App sessions.
 - Domain entities added by future features.
 - Relational data that needs constraints, migrations, or queries.
+
+Do not store content in Drift/SQLite solely because it is displayed in the app.
+Choose a remote data source, memory state, file cache, or dedicated cache layer
+when that better matches the feature's lifetime and access pattern.
 
 Do not store these in Flutter restoration:
 

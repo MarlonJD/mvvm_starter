@@ -76,6 +76,12 @@ Drift owns the SQLite schema in `lib/core/database/app_database.dart`.
 The starter stores users and active sessions in SQLite and enforces a singleton
 active session with the `app_sessions` table.
 
+Do not treat Drift/SQLite as the default storage for every content feature.
+Use it for durable domain data, offline-first behavior, relational queries,
+local search/filtering at scale, sync boundaries, constraints, or migrations.
+Remote-only content can stay behind repositories and remote data sources until
+it has a real local persistence requirement.
+
 Hive is removed from the default starter. `shared_preferences` is not used for
 domain data and should only be added for tiny primitive preferences if a
 settings example is implemented.

@@ -70,6 +70,12 @@ SQLite through Drift is the canonical store for app/domain data. The current
 schema has `users` and singleton `app_sessions` tables with uniqueness,
 foreign keys, cascade delete, timestamps, and a single active session guarantee.
 
+Drift/SQLite is not the default place for every piece of app content. Use it
+when data is durable domain state, offline-first data, relational/query-heavy
+data, or data that needs migrations and constraints. Content that is simply
+fetched from a remote API can stay behind a repository and remote data source
+until offline behavior, search, sync, or durable local state is required.
+
 Hive is not included by default. Reintroduce it only for a documented
 cache-only use case where Drift is not the source of truth.
 
