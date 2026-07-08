@@ -16,17 +16,20 @@ final class RouterService {
   RouterService({
     required AuthRepository authRepository,
     required AppRouteWidgetBuilder homeBuilder,
+    required AppRouteWidgetBuilder networkExamplesBuilder,
     required AppRouteWidgetBuilder loginBuilder,
     required AppRouteWidgetBuilder signupBuilder,
     required AppRouteWidgetBuilder debugDatabaseBuilder,
   })  : _authRepository = authRepository,
         _homeBuilder = homeBuilder,
+        _networkExamplesBuilder = networkExamplesBuilder,
         _loginBuilder = loginBuilder,
         _signupBuilder = signupBuilder,
         _debugDatabaseBuilder = debugDatabaseBuilder;
 
   final AuthRepository _authRepository;
   final AppRouteWidgetBuilder _homeBuilder;
+  final AppRouteWidgetBuilder _networkExamplesBuilder;
   final AppRouteWidgetBuilder _loginBuilder;
   final AppRouteWidgetBuilder _signupBuilder;
   final AppRouteWidgetBuilder _debugDatabaseBuilder;
@@ -39,6 +42,11 @@ final class RouterService {
         name: AppRoute.home.name,
         path: AppRoute.home.path,
         builder: _homeBuilder,
+      ),
+      GoRoute(
+        name: AppRoute.networkExamples.name,
+        path: AppRoute.networkExamples.path,
+        builder: _networkExamplesBuilder,
       ),
       GoRoute(
         name: AppRoute.login.name,

@@ -20,13 +20,15 @@ void main() {
 
     final tables = await database
         .customSelect(
-          "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('users', 'app_sessions')",
+          "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('users', 'app_sessions', 'rest_posts', 'graphql_countries')",
         )
         .get();
 
     expect(tables.map((row) => row.read<String>("name")), {
       "users",
       "app_sessions",
+      "rest_posts",
+      "graphql_countries",
     });
   });
 }

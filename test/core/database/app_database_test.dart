@@ -1,3 +1,4 @@
+import "package:drift/drift.dart";
 import "package:drift/native.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:mvvm_starter/core/database/app_database.dart";
@@ -95,5 +96,59 @@ void main() {
         .go();
 
     expect(await database.select(database.appSessions).get(), isEmpty);
+  });
+
+  test("rest_posts enforces unique remote ids", () async {
+    final now = DateTime.utc(2026);
+
+    await database.into(database.restPosts).insert(
+          RestPostsCompanion.insert(
+            id: const Value(1),
+            userId: 1,
+            title: "Title",
+            body: "Body",
+            fetchedAt: now,
+          ),
+        );
+
+    await expectLater(
+      database.into(database.restPosts).insert(
+            RestPostsCompanion.insert(
+              id: const Value(1),
+              userId: 2,
+              title: "Duplicate",
+              body: "Body",
+              fetchedAt: now,
+            ),
+          ),
+      throwsException,
+    );
+  });
+
+  test("graphql_countries enforces unique country codes", () async {
+    final now = DateTime.utc(2026);
+
+    await database.into(database.graphqlCountries).insert(
+          GraphqlCountriesCompanion.insert(
+            code: "TR",
+            name: "Turkey",
+            emoji: "TR",
+            capital: const Value("Ankara"),
+            fetchedAt: now,
+          ),
+        );
+
+    await expectLater(
+      database.into(database.graphqlCountries).insert(
+            GraphqlCountriesCompanion.insert(
+              code: "TR",
+              name: "Duplicate",
+              emoji: "TR",
+              capital: const Value("Ankara"),
+              fetchedAt: now,
+            ),
+          ),
+      throwsException,
+    );
   });
 }

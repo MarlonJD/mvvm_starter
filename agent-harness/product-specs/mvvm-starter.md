@@ -11,6 +11,7 @@ injection, and localization.
 - Login flow through `/login`.
 - Signup flow through `/signup`.
 - Home view through `/`.
+- Network examples through `/network-examples`.
 - Debug database view through `/debug/database` in debug builds.
 - Session-aware routing based on `AuthRepository`.
 - English and Turkish localization assets.
@@ -23,12 +24,17 @@ injection, and localization.
 - If no user session exists, protected navigation redirects to `/login`.
 - If a user session exists, the home route is available.
 - Home UI can display the current user and perform logout behavior.
+- Network examples can fetch and render live REST and GraphQL data.
+- Network examples demonstrate remote-only and Drift-backed persistence paths.
+- OIDC examples document token header, refresh, and logout boundaries for REST
+  and GraphQL clients.
 - Login and signup name inputs restore short-lived text through Flutter
   restoration.
 
 ## Non-Goals
 
 - Hosted authentication.
+- Production OIDC provider configuration.
 - Production-grade credential storage.
 - Remote synchronization.
 - Full design system.

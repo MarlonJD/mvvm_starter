@@ -14,6 +14,9 @@ enum AppErrorType {
   /// Persistence failed.
   database,
 
+  /// Network or remote service failed.
+  network,
+
   /// An unexpected error occurred.
   unknown,
 }
@@ -56,6 +59,14 @@ final class AppError {
   const AppError.database(String messageKey, {Object? cause})
       : this(
           type: AppErrorType.database,
+          messageKey: messageKey,
+          cause: cause,
+        );
+
+  /// Creates a network error.
+  const AppError.network(String messageKey, {Object? cause})
+      : this(
+          type: AppErrorType.network,
           messageKey: messageKey,
           cause: cause,
         );

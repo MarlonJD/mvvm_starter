@@ -45,7 +45,8 @@ lib/
 `-- features/
     |-- auth/
     |-- debug_database/
-    `-- home/
+    |-- home/
+    `-- network_examples/
 ```
 
 Create new features under `lib/features/<feature>/` with `data/`, `domain/`,
@@ -64,17 +65,44 @@ Auth redirects are based on `AuthRepository.activeUser`:
 - unauthenticated `/login` and `/signup` are allowed;
 - authenticated `/login` and `/signup` redirect to `/`.
 
+The authenticated `/network-examples` route demonstrates REST and GraphQL data
+access patterns.
+
 ## Storage
 
 SQLite through Drift is the canonical store for app/domain data. The current
-schema has `users` and singleton `app_sessions` tables with uniqueness,
-foreign keys, cascade delete, timestamps, and a single active session guarantee.
+schema has `users`, singleton `app_sessions`, and small persisted network
+example tables with uniqueness, foreign keys where applicable, timestamps, and
+a single active session guarantee.
 
 Drift/SQLite is not the default place for every piece of app content. Use it
 when data is durable domain state, offline-first data, relational/query-heavy
 data, or data that needs migrations and constraints. Content that is simply
 fetched from a remote API can stay behind a repository and remote data source
 until offline behavior, search, sync, or durable local state is required.
+
+## REST, GraphQL, And OIDC Examples
+
+`lib/features/network_examples/` shows four live network flows:
+
+- REST remote-only: fetches JSONPlaceholder posts and renders the response.
+- REST persisted: fetches posts, writes a Drift snapshot, then renders local
+  rows.
+- GraphQL remote-only: fetches Countries API data and renders the response.
+- GraphQL persisted: fetches countries, writes a Drift snapshot, then renders
+  local rows.
+
+The same folder includes a small OIDC boundary example. `OidcAuthorization`
+turns an `OidcTokenProvider` into REST or GraphQL headers, refreshes expired
+access tokens before use, and delegates logout to the provider adapter. A real
+OIDC login is intentionally not wired without issuer/client/redirect
+configuration and an approved secure token storage policy.
+
+Use remote-only for content that can be reloaded. Use Drift persistence when
+offline reads, app restart durability, local queries, constraints, migrations,
+or sync boundaries are real product requirements. For offline writes, add a
+sync model with dirty flags, remote ids, versioning, retry queues, and conflict
+resolution instead of treating SQLite as a simple response cache.
 
 Hive is not included by default. Reintroduce it only for a documented
 cache-only use case where Drift is not the source of truth.
@@ -111,7 +139,7 @@ flutter test --coverage
 
 The test suite includes examples for database constraints/migration,
 repositories, ViewModels, router redirects, widget flows, localization key
-parity, and restoration.
+parity, network persistence boundaries, OIDC token headers, and restoration.
 
 ## Agent Harness
 

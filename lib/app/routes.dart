@@ -3,6 +3,9 @@ enum AppRoute {
   /// Authenticated home route.
   home("/"),
 
+  /// Network examples route.
+  networkExamples("/network-examples"),
+
   /// Login route.
   login("/login"),
 

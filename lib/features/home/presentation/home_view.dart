@@ -32,6 +32,13 @@ final class HomeView extends StatelessWidget {
               },
               icon: const Icon(Icons.storage_outlined),
             ),
+          IconButton(
+            tooltip: "networkExamples.title".tr(),
+            onPressed: () {
+              context.pushNamed(AppRoute.networkExamples.name);
+            },
+            icon: const Icon(Icons.cloud_sync_outlined),
+          ),
         ],
       ),
       body: Center(

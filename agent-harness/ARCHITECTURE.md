@@ -33,7 +33,8 @@ lib/
 |-- features/
 |   |-- auth/
 |   |-- debug_database/
-|   `-- home/
+|   |-- home/
+|   `-- network_examples/
 |-- main.dart
 `-- route.dart
 ```
@@ -44,6 +45,7 @@ Use this direction for new work:
 
 ```text
 View -> ViewModel -> Repository -> LocalDataSource -> Drift/SQLite
+View -> ViewModel -> Repository -> RemoteDataSource -> REST/GraphQL
 ```
 
 Rules:
@@ -52,6 +54,8 @@ Rules:
 - View models may depend on repositories and simple model/result types.
 - Repositories may depend on feature-local data sources and domain model types.
 - Local data sources may depend on Drift database APIs.
+- Remote data sources may depend on HTTP/OIDC transport helpers and map remote
+  payloads into feature domain model types.
 - `lib/app/di.dart` is the composition root for shared dependencies.
 - `lib/app/router.dart` is the routing composition point.
 - `lib/core/locator.dart` and `lib/route.dart` are transitional exports only.
@@ -81,6 +85,16 @@ Use it for durable domain data, offline-first behavior, relational queries,
 local search/filtering at scale, sync boundaries, constraints, or migrations.
 Remote-only content can stay behind repositories and remote data sources until
 it has a real local persistence requirement.
+
+The `network_examples` feature demonstrates REST and GraphQL with both
+remote-only and persisted snapshot paths. Its persisted examples add Drift
+tables because their purpose is to demonstrate a local persistence boundary;
+that does not mean every API response should become a SQLite table.
+
+OIDC is represented as a token/header boundary for future provider adapters.
+Real OIDC login requires provider configuration, secure token storage, refresh
+token rotation, and logout/end-session policy before it should be treated as a
+production auth implementation.
 
 Hive is removed from the default starter. `shared_preferences` is not used for
 domain data and should only be added for tiny primitive preferences if a

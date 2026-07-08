@@ -10,6 +10,8 @@ discover without chat history.
   pattern.
 - `storage-strategy.md` - Drift/SQLite storage boundaries, Hive removal, and
   preference limits.
+- `network-and-oidc-strategy.md` - REST, GraphQL, local persistence, and OIDC
+  token boundary examples.
 
 ## When To Add A Design Doc
 

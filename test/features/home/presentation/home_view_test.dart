@@ -10,6 +10,9 @@ import "package:mvvm_starter/features/debug_database/presentation/database_debug
 import "package:mvvm_starter/features/debug_database/presentation/database_debug_view_model.dart";
 import "package:mvvm_starter/features/home/presentation/home_view.dart";
 import "package:mvvm_starter/features/home/presentation/home_view_model.dart";
+import "package:mvvm_starter/features/network_examples/data/network_examples_repository.dart";
+import "package:mvvm_starter/features/network_examples/presentation/network_examples_view.dart";
+import "package:mvvm_starter/features/network_examples/presentation/network_examples_view_model.dart";
 
 import "../../../helpers/test_auth_harness.dart";
 
@@ -23,6 +26,11 @@ void main() {
       authRepository: harness.repository,
       homeBuilder: (context, state) => HomeView(
         viewModel: HomeViewModel(authRepository: harness.repository),
+      ),
+      networkExamplesBuilder: (context, state) => NetworkExamplesView(
+        viewModel: NetworkExamplesViewModel(
+          repository: NetworkExamplesRepository.fake(),
+        ),
       ),
       loginBuilder: (context, state) => LoginView(
         viewModel: LoginViewModel(authRepository: harness.repository),
