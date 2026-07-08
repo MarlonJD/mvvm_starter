@@ -9,18 +9,22 @@ injection, and localization.
 ## Current User-Facing Areas
 
 - Login flow through `/login`.
+- Signup flow through `/signup`.
 - Home view through `/`.
-- Session-aware routing based on `UserService`.
+- Debug database view through `/debug/database` in debug builds.
+- Session-aware routing based on `AuthRepository`.
 - English and Turkish localization assets.
 
 ## Current Acceptance Criteria
 
 - App initializes Flutter bindings and localization before rendering.
-- Shared services are registered through `setupLocator()`.
-- Local database tables for users and sessions are created at startup.
+- Shared services are registered through `setupDependencies()`.
+- Drift owns local database tables for users and app sessions.
 - If no user session exists, protected navigation redirects to `/login`.
 - If a user session exists, the home route is available.
 - Home UI can display the current user and perform logout behavior.
+- Login and signup name inputs restore short-lived text through Flutter
+  restoration.
 
 ## Non-Goals
 

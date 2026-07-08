@@ -42,6 +42,18 @@ flutter test --coverage
 - Use parameterized SQL for runtime values.
 - Add tests around schema changes and data migration behavior when schema moves
   out of `main.dart`.
+- Use in-memory Drift databases for repository, migration, and schema tests.
+
+### Router
+
+- Cover auth redirects for unauthenticated and authenticated flows.
+- Keep go_router route names and paths centralized in app route constants.
+
+### Restoration
+
+- Use widget tests with `tester.restartAndRestore()` for pages that register
+  restorable ViewModel properties.
+- Do not use restoration tests to prove domain persistence.
 
 ## Verification Labels
 

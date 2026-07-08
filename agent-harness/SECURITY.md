@@ -9,8 +9,8 @@ mechanical only when the behavior exists in code.
 
 - Never commit secrets, tokens, private keys, or machine-specific credentials.
 - Do not log personal data, session identifiers, or raw persistence rows.
-- Use SQL parameter binding for runtime values.
-- Keep authentication and session behavior in `UserService` and route
+- Keep SQL access behind Drift data sources and repositories.
+- Keep authentication and session behavior in `AuthRepository` and route
   composition.
 - Avoid direct persistence access from views.
 - Treat dependency updates as behavior changes when they touch persistence,
@@ -21,7 +21,7 @@ mechanical only when the behavior exists in code.
 ## Current Risk Notes
 
 - Session handling is simple and local-only.
-- Database schema creation currently lives in `main.dart`.
+- Database schema and migrations live in Drift.
 - No secret scanning or dependency audit command is documented.
 - No threat model exists for production use.
 

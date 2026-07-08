@@ -1,3 +1,25 @@
 {
-    "Welcome, {}": "Hoşgeldin, {}"
+  "auth.login.title": "Giriş",
+  "auth.login.button": "Giriş",
+  "auth.signup.title": "Hesap Oluştur",
+  "auth.signup.button": "Hesap Oluştur",
+  "auth.signup.cta": "Hesap Oluştur",
+  "auth.name.label": "İsim",
+  "auth.nameRequired": "Lütfen bir isim girin",
+  "auth.userNotFound": "Bu isimle ilişkili kullanıcı yok",
+  "auth.userAlreadyExists": "Kullanıcı zaten var",
+  "errors.database": "Veritabanı hatası",
+  "home.title": "Ana Sayfa",
+  "home.welcome": "Hoşgeldin, {}",
+  "home.deleteAllUsers": "Tüm Kullanıcıları Sil",
+  "home.logout": "Çıkış",
+  "home.loggedOut": "Çıkış yapıldı",
+  "debug.database.title": "Veritabanı Görünümü",
+  "debug.database.sessions": "Oturumlar",
+  "debug.database.users": "Kullanıcılar",
+  "debug.database.noSessions": "Veritabanında oturum yok",
+  "debug.database.noUsers": "Veritabanında kullanıcı yok",
+  "debug.database.sessionUserId": "Oturum user_id: {}",
+  "debug.database.userSubtitle": "ID: {} - UID: {}",
+  "debug.database.deleteUser": "Kullanıcıyı sil"
 }

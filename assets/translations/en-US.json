@@ -1,3 +1,25 @@
 {
-    
+  "auth.login.title": "Login",
+  "auth.login.button": "Login",
+  "auth.signup.title": "Create Account",
+  "auth.signup.button": "Create Account",
+  "auth.signup.cta": "Create Account",
+  "auth.name.label": "Name",
+  "auth.nameRequired": "Please enter a name",
+  "auth.userNotFound": "No user associated with this name",
+  "auth.userAlreadyExists": "User already exists",
+  "errors.database": "Database error",
+  "home.title": "Home",
+  "home.welcome": "Welcome, {}",
+  "home.deleteAllUsers": "Delete All Users",
+  "home.logout": "Logout",
+  "home.loggedOut": "Logged out",
+  "debug.database.title": "Database View",
+  "debug.database.sessions": "Sessions",
+  "debug.database.users": "Users",
+  "debug.database.noSessions": "No sessions in database",
+  "debug.database.noUsers": "No users in database",
+  "debug.database.sessionUserId": "Session user_id: {}",
+  "debug.database.userSubtitle": "ID: {} - UID: {}",
+  "debug.database.deleteUser": "Delete user"
 }

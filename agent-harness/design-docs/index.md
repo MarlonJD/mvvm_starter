@@ -6,6 +6,10 @@ discover without chat history.
 ## Documents
 
 - `core-beliefs.md` - repo-level principles for agent-readable development.
+- `restorable-mvvm.md` - Flutter restoration boundaries and MVVM registration
+  pattern.
+- `storage-strategy.md` - Drift/SQLite storage boundaries, Hive removal, and
+  preference limits.
 
 ## When To Add A Design Doc
 

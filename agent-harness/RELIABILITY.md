@@ -11,7 +11,7 @@ implicit human knowledge.
 - Unit and widget tests through `flutter test`.
 - Coverage through `flutter test --coverage`.
 - Runtime routing through `go_router`.
-- User/session state through `UserService.userNotifier`.
+- User/session state through `AuthRepository.activeUser`.
 
 ## Runtime Readability Rules
 
@@ -45,5 +45,5 @@ The first smoke tests should cover:
 - Add a documented command for running the app on the preferred local target.
 - Add browser or simulator UI automation for the core auth flow.
 - Add screenshots or videos as optional evidence for visual behavior changes.
-- Add a small diagnostics document for common Flutter, SQLite, Hive, and
+- Add a small diagnostics document for common Flutter, Drift/SQLite, and
   localization failures.

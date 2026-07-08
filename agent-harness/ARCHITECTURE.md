@@ -12,30 +12,27 @@ and core abstractions isolate persistence and runtime dependencies.
 - `get_it` for dependency injection
 - `go_router` for navigation
 - `easy_localization` for localization
-- `sqlite3` through a local abstraction
-- `hive_ce` and `hive_ce_flutter` through a local abstraction
+- Drift over SQLite for canonical app/domain persistence
 - `flutter_lints` plus repo-specific lint rules
 
 ## Current Layout
 
 ```text
 lib/
-|-- auth/
-|   |-- login_view.dart
-|   |-- login_view_model.dart
-|   |-- signup_view.dart
-|   |-- signup_view_model.dart
-|   |-- user.dart
-|   `-- user_service.dart
+|-- app/
+|   |-- app.dart
+|   |-- bootstrap.dart
+|   |-- di.dart
+|   |-- router.dart
+|   `-- routes.dart
 |-- core/
-|   |-- database_abstract.dart
-|   |-- database_view.dart
-|   |-- database_view_model.dart
-|   |-- date_service.dart
-|   |-- hive_abstract.dart
-|   |-- locator.dart
-|   `-- sqlite/
-|-- pages/
+|   |-- database/
+|   |-- errors/
+|   |-- restoration/
+|   `-- result/
+|-- features/
+|   |-- auth/
+|   |-- debug_database/
 |   `-- home/
 |-- main.dart
 `-- route.dart
@@ -46,30 +43,28 @@ lib/
 Use this direction for new work:
 
 ```text
-View -> ViewModel -> Service -> Core Abstraction -> Platform Implementation
+View -> ViewModel -> Repository -> LocalDataSource -> Drift/SQLite
 ```
 
 Rules:
 
 - Views may depend on Flutter, localization, route state, and their view model.
-- View models may depend on services and simple model types.
-- Services may depend on core abstractions and model types.
-- Core abstractions may depend on package APIs they wrap.
-- Platform-specific implementations stay under `lib/core/` or a feature-local
-  implementation folder.
-- `lib/core/locator.dart` is the composition root for shared services.
-- `lib/route.dart` is the routing composition point.
+- View models may depend on repositories and simple model/result types.
+- Repositories may depend on feature-local data sources and domain model types.
+- Local data sources may depend on Drift database APIs.
+- `lib/app/di.dart` is the composition root for shared dependencies.
+- `lib/app/router.dart` is the routing composition point.
+- `lib/core/locator.dart` and `lib/route.dart` are transitional exports only.
 
 ## Feature Shape
 
 For a new feature, prefer a folder shaped like this:
 
 ```text
-lib/<feature>/
-|-- <feature>_view.dart
-|-- <feature>_view_model.dart
-|-- <feature>_service.dart
-`-- <feature>_model.dart
+lib/features/<feature>/
+|-- data/
+|-- domain/
+`-- presentation/
 ```
 
 Use subfolders only when the feature grows enough that file names stop being
@@ -77,17 +72,18 @@ self-explanatory.
 
 ## Persistence
 
-SQLite is currently used for users and sessions through
-`DatabaseAbstraction`. SQL statements should use parameter binding for runtime
-values.
+Drift owns the SQLite schema in `lib/core/database/app_database.dart`.
+The starter stores users and active sessions in SQLite and enforces a singleton
+active session with the `app_sessions` table.
 
-Hive is wrapped by `HiveDatabaseAbstraction`. Keep direct Hive access behind
-that abstraction unless a plan explicitly changes the persistence boundary.
+Hive is removed from the default starter. `shared_preferences` is not used for
+domain data and should only be added for tiny primitive preferences if a
+settings example is implemented.
 
 ## Routing
 
-Routes are declared in `RouterService` in `lib/route.dart`. Authentication
-redirects are based on `UserService.userNotifier`.
+Routes are declared in `RouterService` in `lib/app/router.dart`.
+Authentication redirects are based on `AuthRepository.activeUser`.
 
 When adding routes:
 
@@ -110,16 +106,20 @@ When adding user-facing copy:
 ## Architectural Invariants
 
 - No direct persistence package calls from views.
-- No navigation side effects inside persistence abstractions.
+- No direct service locator calls from feature Views.
+- No navigation side effects inside persistence or repository layers.
 - No service lookup hidden inside model types.
 - No broad refactors without an execution plan.
 - No new global mutable state outside the dependency injection boundary.
+- Use go_router for app navigation.
+- Store app/domain data in Drift/SQLite.
+- Use Flutter restoration only for ephemeral UI state.
 
 ## Known Gaps
 
 - Import direction is documented but not mechanically enforced.
 - Widget key strategy is not defined yet.
-- Product strings are not consistently localized.
-- Database schema ownership is still embedded in `main.dart`.
+- Product strings are localized for the main starter flows, but enforcement is
+  only covered by key parity tests.
 
 Track follow-up work in `exec-plans/tech-debt-tracker.md`.

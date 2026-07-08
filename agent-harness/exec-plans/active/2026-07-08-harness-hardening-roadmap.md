@@ -55,7 +55,8 @@ Add the command to `agent-harness/QUALITY.md` under future mechanical checks and
 
 - [ ] **Step 1: Add boundary rules**
 
-Encode the first rule set: files ending in `_view.dart` must not import `sqlite`, `hive`, `database_abstract.dart`, or `hive_abstract.dart`.
+Encode the first rule set: files ending in `_view.dart` must not import
+`drift`, `app_database.dart`, feature `data/` sources, or `locator.dart`.
 
 - [ ] **Step 2: Run the boundary check**
 
@@ -100,12 +101,14 @@ Document the command and retire or narrow `TD-003`.
 - Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
-- Consumes: `RouterService`, `UserService`, `HomeView`, and `LoginView`.
-- Produces: Widget tests for unauthenticated redirect, authenticated home access, and logout behavior.
+- Consumes: `RouterService`, `AuthRepository`, `HomeView`, and `LoginView`.
+- Produces: Widget tests for unauthenticated redirect, authenticated home
+  access, and logout behavior.
 
-- [ ] **Step 1: Add fakes**
+- [ ] **Step 1: Add deterministic test setup**
 
-Create fake services that make auth state deterministic without touching real SQLite or Hive.
+Use in-memory Drift databases and real repositories to make auth state
+deterministic without touching device storage.
 
 - [ ] **Step 2: Add smoke tests**
 
@@ -128,16 +131,18 @@ Mark the smoke test target as covered and retire or narrow `TD-004`.
 - Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
-- Consumes: `lib/main.dart`, `lib/core/database_abstract.dart`, and auth service schema needs.
-- Produces: A design decision for moving schema ownership out of app startup.
+- Consumes: `lib/core/database/app_database.dart`,
+  `lib/core/database/migrations.dart`, and auth repository schema needs.
+- Produces: a design decision for future schema ownership changes.
 
 - [ ] **Step 1: Document current schema ownership**
 
-Record the current tables, startup flow, and risks in the design doc.
+Record the current Drift tables, startup flow, and risks in the design doc.
 
 - [ ] **Step 2: Choose a migration boundary**
 
-Specify whether schema creation belongs in a database initializer, auth module migration, or app bootstrap service.
+Specify whether future schema changes belong in the shared database, a
+feature-local DAO/data source, or an app bootstrap migration.
 
 - [ ] **Step 3: Create a follow-up implementation plan**
 
