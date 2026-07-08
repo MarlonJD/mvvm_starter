@@ -2,6 +2,12 @@
 
 A new Flutter project.
 
+## Agent Harness
+
+This repository includes an agentic engineering harness under
+`agent-harness/`. Start with `AGENTS.md` for repo-specific agent instructions
+and use `agent-harness/exec-plans/` for multi-step work.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
