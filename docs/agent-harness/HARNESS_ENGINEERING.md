@@ -27,7 +27,7 @@ repeated rules into mechanical checks.
 
 2. Make repo knowledge durable.
    Architecture, product intent, quality rules, and debt live in versioned
-   markdown under `agent-harness/`.
+   markdown under `docs/agent-harness/`.
 
 3. Treat plans as artifacts.
    Multi-step work gets an execution plan with acceptance criteria, decisions,
@@ -50,7 +50,7 @@ repeated rules into mechanical checks.
 
 - `AGENTS.md` exists and routes agents to the right local context.
 - `CLAUDE.md` delegates to `AGENTS.md`.
-- `agent-harness/` contains the initial source-of-truth documents.
+- `docs/agent-harness/` contains the initial source-of-truth documents.
 
 ### Level 1: Predictable Verification
 

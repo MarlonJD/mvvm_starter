@@ -144,5 +144,5 @@ parity, network persistence boundaries, OIDC token headers, and restoration.
 ## Agent Harness
 
 Repo-local agent instructions live in `AGENTS.md`; deeper durable context lives
-under `agent-harness/`. Update harness design docs or execution plans when an
-architecture decision changes.
+under `docs/agent-harness/`. Update harness design docs or execution plans when
+an architecture decision changes.

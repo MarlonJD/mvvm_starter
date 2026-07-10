@@ -1,16 +1,16 @@
 # Agent Instructions
 
 This file is the short map for agentic work in this repository. Keep it small.
-Deep context lives under `agent-harness/`.
+Deep context lives under `docs/agent-harness/`.
 
 ## Read Order
 
-1. Start with `agent-harness/README.md` for the harness map.
-2. Read `agent-harness/ARCHITECTURE.md` before changing app structure.
-3. Read `agent-harness/QUALITY.md` before changing behavior or tests.
-4. Read the relevant `agent-harness/product-specs/` file before changing product behavior.
+1. Start with `docs/agent-harness/README.md` for the harness map.
+2. Read `docs/agent-harness/ARCHITECTURE.md` before changing app structure.
+3. Read `docs/agent-harness/QUALITY.md` before changing behavior or tests.
+4. Read the relevant `docs/agent-harness/product-specs/` file before changing product behavior.
 5. For multi-step work, create or update an execution plan in
-   `agent-harness/exec-plans/active/`.
+   `docs/agent-harness/exec-plans/active/`.
 
 ## Repository Snapshot
 
@@ -35,7 +35,7 @@ Deep context lives under `agent-harness/`.
 - Do not clean up unrelated code unless the user asks.
 - Keep user changes intact; never revert unowned work.
 - Use package imports for Dart files, matching the repo lint rules.
-- Put durable decisions in `agent-harness/`, not only in chat.
+- Put durable decisions in `docs/agent-harness/`, not only in chat.
 
 ## Architecture Rules
 
@@ -52,13 +52,13 @@ Deep context lives under `agent-harness/`.
 
 - Small mechanical changes may use an inline plan.
 - Work that touches multiple files, product behavior, architecture, or testing
-  gets an execution plan in `agent-harness/exec-plans/active/`.
+  gets an execution plan in `docs/agent-harness/exec-plans/active/`.
 - Execution plans should include files, acceptance criteria, verification
   commands, decision log entries, and completion notes.
-- When a plan is completed, move it to `agent-harness/exec-plans/completed/`
+- When a plan is completed, move it to `docs/agent-harness/exec-plans/completed/`
   and leave a short completion note.
 - Track known follow-up work in
-  `agent-harness/exec-plans/tech-debt-tracker.md`.
+  `docs/agent-harness/exec-plans/tech-debt-tracker.md`.
 
 ## Verification
 

@@ -74,7 +74,7 @@ A change is done when:
 - The requested behavior or document exists.
 - Relevant tests or static checks pass, or the reason they were not run is
   documented.
-- Durable decisions are captured in `agent-harness/`.
+- Durable decisions are captured in `docs/agent-harness/`.
 - Follow-up work is recorded in `exec-plans/tech-debt-tracker.md`.
 - No unrelated user work was reverted.
 
@@ -86,4 +86,4 @@ These checks should be promoted from documentation to tooling:
 - Maximum file size warnings for agent readability.
 - Translation coverage check for supported locales.
 - Route smoke tests for authentication redirects.
-- Documentation link check for `agent-harness/`.
+- Documentation link check for `docs/agent-harness/`.

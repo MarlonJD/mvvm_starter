@@ -4,7 +4,7 @@
 
 **Goal:** Promote the bootstrap harness from documentation-only guidance into repeatable checks for architecture, docs, localization, and core app behavior.
 
-**Architecture:** Add small, focused verification scripts and tests that encode the rules already documented in `agent-harness/`. Keep each check independently useful and avoid changing product behavior except where tests expose an existing harness gap.
+**Architecture:** Add small, focused verification scripts and tests that encode the rules already documented in `docs/agent-harness/`. Keep each check independently useful and avoid changing product behavior except where tests expose an existing harness gap.
 
 **Tech Stack:** Flutter, Dart, shell, Markdown, flutter_test.
 
@@ -13,7 +13,7 @@
 - Do not create, switch, rename, or delete git branches without explicit user approval.
 - Keep repository documentation in English unless repo-local instructions require another language.
 - Keep checks small enough that failures give agent-readable fix instructions.
-- Add follow-up debt to `agent-harness/exec-plans/tech-debt-tracker.md` instead of expanding scope silently.
+- Add follow-up debt to `docs/agent-harness/exec-plans/tech-debt-tracker.md` instead of expanding scope silently.
 
 ---
 
@@ -21,11 +21,11 @@
 
 **Files:**
 - Create: `tool/check_agent_harness_links.dart`
-- Modify: `agent-harness/QUALITY.md`
-- Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
+- Modify: `docs/agent-harness/QUALITY.md`
+- Modify: `docs/agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
-- Consumes: Markdown files under `agent-harness/`, `AGENTS.md`, `CLAUDE.md`, and `README.md`.
+- Consumes: Markdown files under `docs/agent-harness/`, `AGENTS.md`, `CLAUDE.md`, and `README.md`.
 - Produces: A local command that exits nonzero when a relative markdown link points to a missing file.
 
 - [ ] **Step 1: Add the checker**
@@ -40,14 +40,14 @@ Expected: PASS with a summary of checked files and links.
 
 - [ ] **Step 3: Document the gate**
 
-Add the command to `agent-harness/QUALITY.md` under future mechanical checks and retire `TD-006` in the tech debt tracker.
+Add the command to `docs/agent-harness/QUALITY.md` under future mechanical checks and retire `TD-006` in the tech debt tracker.
 
 ### Task 2: MVVM Import Boundary Check
 
 **Files:**
 - Create: `tool/check_mvvm_boundaries.dart`
-- Modify: `agent-harness/ARCHITECTURE.md`
-- Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
+- Modify: `docs/agent-harness/ARCHITECTURE.md`
+- Modify: `docs/agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
 - Consumes: Dart import statements under `lib/`.
@@ -72,8 +72,8 @@ Mark `TD-002` as retired when the command is documented and passing.
 
 **Files:**
 - Create: `tool/check_localization_keys.dart`
-- Modify: `agent-harness/QUALITY.md`
-- Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
+- Modify: `docs/agent-harness/QUALITY.md`
+- Modify: `docs/agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
 - Consumes: JSON files under `assets/translations/`.
@@ -97,8 +97,8 @@ Document the command and retire or narrow `TD-003`.
 
 **Files:**
 - Create: `test/auth_flow_smoke_test.dart`
-- Modify: `agent-harness/RELIABILITY.md`
-- Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
+- Modify: `docs/agent-harness/RELIABILITY.md`
+- Modify: `docs/agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
 - Consumes: `RouterService`, `AuthRepository`, `HomeView`, and `LoginView`.
@@ -127,8 +127,8 @@ Mark the smoke test target as covered and retire or narrow `TD-004`.
 ### Task 5: Schema Ownership Plan
 
 **Files:**
-- Create: `agent-harness/design-docs/database-schema-ownership.md`
-- Modify: `agent-harness/exec-plans/tech-debt-tracker.md`
+- Create: `docs/agent-harness/design-docs/database-schema-ownership.md`
+- Modify: `docs/agent-harness/exec-plans/tech-debt-tracker.md`
 
 **Interfaces:**
 - Consumes: `lib/core/database/app_database.dart`,

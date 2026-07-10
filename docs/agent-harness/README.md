@@ -19,7 +19,7 @@ phase.
 
 ## Reading Path
 
-1. `../AGENTS.md` - short entry point for all agents.
+1. `../../AGENTS.md` - short entry point for all agents.
 2. `HARNESS_ENGINEERING.md` - operating model and maturity ladder.
 3. `ARCHITECTURE.md` - current Flutter/MVVM architecture.
 4. `QUALITY.md` - verification and testing policy.
@@ -31,7 +31,7 @@ phase.
 ## Directory Map
 
 ```text
-agent-harness/
+docs/agent-harness/
 |-- README.md
 |-- HARNESS_ENGINEERING.md
 |-- ARCHITECTURE.md
