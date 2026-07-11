@@ -6,6 +6,9 @@ enum AppRoute {
   /// Network examples route.
   networkExamples("/network-examples"),
 
+  /// Native OIDC example route.
+  oidcExample("/auth/oidc-example"),
+
   /// Login route.
   login("/login"),
 

@@ -5,31 +5,26 @@ import "package:mvvm_starter/app/routes.dart";
 import "package:mvvm_starter/features/auth/data/auth_repository.dart";
 
 /// Route widget builder.
-typedef AppRouteWidgetBuilder = Widget Function(
-  BuildContext context,
-  GoRouterState state,
-);
+typedef AppRouteWidgetBuilder =
+    Widget Function(BuildContext context, GoRouterState state);
 
 /// App router composition service.
 final class RouterService {
   /// Creates the app router.
   RouterService({
-    required AuthRepository authRepository,
-    required AppRouteWidgetBuilder homeBuilder,
-    required AppRouteWidgetBuilder networkExamplesBuilder,
-    required AppRouteWidgetBuilder loginBuilder,
-    required AppRouteWidgetBuilder signupBuilder,
-    required AppRouteWidgetBuilder debugDatabaseBuilder,
-  })  : _authRepository = authRepository,
-        _homeBuilder = homeBuilder,
-        _networkExamplesBuilder = networkExamplesBuilder,
-        _loginBuilder = loginBuilder,
-        _signupBuilder = signupBuilder,
-        _debugDatabaseBuilder = debugDatabaseBuilder;
+    required this._authRepository,
+    required this._homeBuilder,
+    required this._networkExamplesBuilder,
+    required this._oidcExampleBuilder,
+    required this._loginBuilder,
+    required this._signupBuilder,
+    required this._debugDatabaseBuilder,
+  });
 
   final AuthRepository _authRepository;
   final AppRouteWidgetBuilder _homeBuilder;
   final AppRouteWidgetBuilder _networkExamplesBuilder;
+  final AppRouteWidgetBuilder _oidcExampleBuilder;
   final AppRouteWidgetBuilder _loginBuilder;
   final AppRouteWidgetBuilder _signupBuilder;
   final AppRouteWidgetBuilder _debugDatabaseBuilder;
@@ -47,6 +42,11 @@ final class RouterService {
         name: AppRoute.networkExamples.name,
         path: AppRoute.networkExamples.path,
         builder: _networkExamplesBuilder,
+      ),
+      GoRoute(
+        name: AppRoute.oidcExample.name,
+        path: AppRoute.oidcExample.path,
+        builder: _oidcExampleBuilder,
       ),
       GoRoute(
         name: AppRoute.login.name,
@@ -67,7 +67,8 @@ final class RouterService {
     ],
     redirect: (context, state) {
       final loggedIn = _authRepository.isLoggedIn;
-      final isAuthRoute = state.matchedLocation == AppRoute.login.path ||
+      final isAuthRoute =
+          state.matchedLocation == AppRoute.login.path ||
           state.matchedLocation == AppRoute.signup.path;
 
       if (!loggedIn && !isAuthRoute) {

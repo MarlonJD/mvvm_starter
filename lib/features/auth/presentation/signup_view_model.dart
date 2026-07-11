@@ -11,8 +11,7 @@ import "package:mvvm_starter/features/auth/domain/user.dart";
 /// ViewModel for the signup screen.
 final class SignupViewModel implements RestorableViewModel {
   /// Creates a signup ViewModel.
-  SignupViewModel({required AuthRepository authRepository})
-      : _authRepository = authRepository;
+  SignupViewModel({required this._authRepository});
 
   final AuthRepository _authRepository;
 
@@ -20,8 +19,9 @@ final class SignupViewModel implements RestorableViewModel {
   final AppRestorableTextEditingController nameController =
       AppRestorableTextEditingController();
 
-  final ValueNotifier<UiState<User>> _state =
-      ValueNotifier<UiState<User>>(const UiState.idle());
+  final ValueNotifier<UiState<User>> _state = ValueNotifier<UiState<User>>(
+    const UiState.idle(),
+  );
 
   /// Current signup UI state.
   ValueListenable<UiState<User>> get state => _state;
@@ -36,10 +36,7 @@ final class SignupViewModel implements RestorableViewModel {
     }
 
     _state.value = const UiState.loading();
-    final result = await _authRepository.createUser(
-      name,
-      isAdmin: name == "admin",
-    );
+    final result = await _authRepository.createUser(name);
     final user = result.valueOrNull;
     final error = result.errorOrNull;
     if (user != null) {

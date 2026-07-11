@@ -63,9 +63,7 @@ final class _LoginViewState extends State<LoginView> with RestorationMixin {
               TextFormField(
                 key: loginNameFieldKey,
                 controller: viewModel.nameController.value,
-                decoration: InputDecoration(
-                  labelText: "auth.name.label".tr(),
-                ),
+                decoration: InputDecoration(labelText: "auth.name.label".tr()),
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _login(context),
               ),
@@ -112,9 +110,9 @@ final class _LoginViewState extends State<LoginView> with RestorationMixin {
   }
 
   void _showSnackBar(BuildContext context, AppError error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error.messageKey.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(error.messageKey.tr())));
   }
 
   @override

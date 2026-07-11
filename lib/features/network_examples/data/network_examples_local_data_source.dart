@@ -38,9 +38,9 @@ final class NetworkExamplesLocalDataSource {
 
   /// Reads the persisted REST post snapshot.
   Future<List<RestPost>> restPosts() async {
-    final rows = await (_database.select(_database.restPosts)
-          ..orderBy([(row) => OrderingTerm.asc(row.id)]))
-        .get();
+    final rows = await (_database.select(
+      _database.restPosts,
+    )..orderBy([(row) => OrderingTerm.asc(row.id)])).get();
     return rows
         .map(
           (row) => RestPost(
@@ -82,9 +82,9 @@ final class NetworkExamplesLocalDataSource {
 
   /// Reads the persisted GraphQL countries snapshot.
   Future<List<GraphqlCountry>> graphqlCountries() async {
-    final rows = await (_database.select(_database.graphqlCountries)
-          ..orderBy([(row) => OrderingTerm.asc(row.code)]))
-        .get();
+    final rows = await (_database.select(
+      _database.graphqlCountries,
+    )..orderBy([(row) => OrderingTerm.asc(row.code)])).get();
     return rows
         .map(
           (row) => GraphqlCountry(

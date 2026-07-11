@@ -5,9 +5,9 @@ final class AppRestorableTextEditingController
     extends RestorableTextEditingController {
   /// Creates a restorable text controller.
   AppRestorableTextEditingController({String? text})
-      : super.fromValue(
-          text == null ? TextEditingValue.empty : TextEditingValue(text: text),
-        );
+    : super.fromValue(
+        text == null ? TextEditingValue.empty : TextEditingValue(text: text),
+      );
 
   TextEditingController? _unregisteredController;
 

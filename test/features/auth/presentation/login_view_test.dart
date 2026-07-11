@@ -6,8 +6,9 @@ import "package:mvvm_starter/features/auth/presentation/login_view_model.dart";
 import "../../../helpers/test_auth_harness.dart";
 
 void main() {
-  testWidgets("login displays validation feedback for empty name",
-      (tester) async {
+  testWidgets("login displays validation feedback for empty name", (
+    tester,
+  ) async {
     final harness = createTestAuthHarness();
     addTearDown(harness.dispose);
 

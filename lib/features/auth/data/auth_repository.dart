@@ -9,12 +9,11 @@ import "package:uuid/uuid.dart";
 final class AuthRepository {
   /// Creates an auth repository.
   AuthRepository({
-    required AuthLocalDataSource localDataSource,
+    required this._localDataSource,
     String Function()? uidFactory,
     DateTime Function()? now,
-  })  : _localDataSource = localDataSource,
-        _uidFactory = uidFactory ?? const Uuid().v4,
-        _now = now ?? DateTime.now;
+  }) : _uidFactory = uidFactory ?? const Uuid().v4,
+       _now = now ?? DateTime.now;
 
   final AuthLocalDataSource _localDataSource;
   final String Function() _uidFactory;
@@ -36,10 +35,7 @@ final class AuthRepository {
   }
 
   /// Creates a user and starts an active session.
-  Future<Result<User>> createUser(
-    String name, {
-    bool isAdmin = false,
-  }) async {
+  Future<Result<User>> createUser(String name) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
       return const Result.failure(AppError.validation("auth.nameRequired"));
@@ -49,7 +45,6 @@ final class AuthRepository {
       final user = await _localDataSource.createUserAndSession(
         uid: _uidFactory(),
         name: trimmedName,
-        isAdmin: isAdmin,
         now: _now(),
       );
       _activeUser.value = user;
@@ -97,17 +92,6 @@ final class AuthRepository {
       if (_activeUser.value?.id == user.id) {
         _activeUser.value = null;
       }
-      return const Result.success(null);
-    } on Exception catch (error) {
-      return Result.failure(_mapPersistenceError(error));
-    }
-  }
-
-  /// Deletes all users and clears the active session.
-  Future<Result<void>> deleteAllUsers() async {
-    try {
-      await _localDataSource.deleteAllUsers();
-      _activeUser.value = null;
       return const Result.success(null);
     } on Exception catch (error) {
       return Result.failure(_mapPersistenceError(error));

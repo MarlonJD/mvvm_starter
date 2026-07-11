@@ -23,7 +23,7 @@ final class _RestorableValueListenable<T> extends ChangeNotifier
 abstract base class RestorableNotifier<T> extends RestorableProperty<T> {
   /// Creates a restorable notifier with [defaultValue].
   RestorableNotifier(this.defaultValue)
-      : _listenable = _RestorableValueListenable<T>(defaultValue);
+    : _listenable = _RestorableValueListenable<T>(defaultValue);
 
   /// Default value used when no restoration data exists.
   final T defaultValue;

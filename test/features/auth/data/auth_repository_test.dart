@@ -54,10 +54,9 @@ void main() {
     await repository.login("alice");
 
     expect(repository.activeUser.value?.name, "alice");
-    expect(
-      await repository.sessionUserIds(),
-      [repository.activeUser.value?.id],
-    );
+    expect(await repository.sessionUserIds(), [
+      repository.activeUser.value?.id,
+    ]);
   });
 
   test("deleting active user clears the active session", () async {

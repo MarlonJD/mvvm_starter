@@ -8,10 +8,9 @@ import "package:mvvm_starter/features/auth/domain/user.dart";
 final class DatabaseDebugViewModel {
   /// Creates a debug database ViewModel.
   DatabaseDebugViewModel({
-    required AuthRepository authRepository,
-    bool watchForChanges = true,
-  })  : _authRepository = authRepository,
-        _watchForChanges = watchForChanges;
+    required this._authRepository,
+    this._watchForChanges = true,
+  });
 
   final AuthRepository _authRepository;
   final bool _watchForChanges;
@@ -49,8 +48,9 @@ final class DatabaseDebugViewModel {
       }
       _users.value = users;
     });
-    _sessionsSubscription =
-        _authRepository.watchSessionUserIds().listen((sessions) {
+    _sessionsSubscription = _authRepository.watchSessionUserIds().listen((
+      sessions,
+    ) {
       if (_disposed) {
         return;
       }

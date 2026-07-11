@@ -1,6 +1,9 @@
 import "dart:convert";
 
-import "package:http/http.dart" as http;
+import "package:mvvm_starter/core/network/graphql_request_executor.dart";
+import "package:mvvm_starter/core/network/http_request_executor.dart";
+import "package:mvvm_starter/core/network/network_exception.dart";
+import "package:mvvm_starter/features/network_examples/data/network_example_dtos.dart";
 import "package:mvvm_starter/features/network_examples/domain/network_example_models.dart";
 
 /// Remote REST source for example posts.
@@ -15,55 +18,57 @@ abstract interface class GraphqlCountriesRemoteDataSource {
   Future<List<GraphqlCountry>> fetchCountries({int limit = 6});
 }
 
-/// HTTP implementation backed by JSONPlaceholder.
+/// HTTP implementation backed by a configurable REST endpoint.
 final class HttpRestPostsRemoteDataSource implements RestPostsRemoteDataSource {
   /// Creates a REST posts remote source.
-  const HttpRestPostsRemoteDataSource({required http.Client client})
-      : _client = client;
+  const HttpRestPostsRemoteDataSource({
+    required this.executor,
+    required this.postsUri,
+  });
 
-  final http.Client _client;
+  /// Shared typed HTTP executor.
+  final HttpRequestExecutor executor;
 
-  static final Uri _postsUri = Uri.https(
-    "jsonplaceholder.typicode.com",
-    "/posts",
-  );
+  /// Configured posts endpoint.
+  final Uri postsUri;
 
   @override
   Future<List<RestPost>> fetchPosts({int limit = 5}) async {
-    final uri = _postsUri.replace(queryParameters: {"_limit": "$limit"});
-    final response = await _client.get(uri);
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw http.ClientException(
-        "REST request failed with status ${response.statusCode}",
-        uri,
-      );
-    }
+    final uri = postsUri.replace(
+      queryParameters: {...postsUri.queryParameters, "_limit": "$limit"},
+    );
+    final response = await executor.get(uri);
 
-    final decoded = jsonDecode(response.body) as List<dynamic>;
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } on FormatException catch (error) {
+      throw NetworkException.invalidPayload("rest.envelope", cause: error);
+    }
+    if (decoded is! List<Object?>) {
+      throw const NetworkException.invalidPayload("rest.envelope");
+    }
     return decoded
-        .cast<Map<String, dynamic>>()
-        .map(
-          (item) => RestPost(
-            id: item["id"] as int,
-            userId: item["userId"] as int,
-            title: item["title"] as String,
-            body: item["body"] as String,
-          ),
-        )
+        .map(RestPostDto.fromJson)
+        .map((dto) => dto.toDomain())
         .toList();
   }
 }
 
-/// HTTP implementation backed by the public Countries GraphQL API.
+/// HTTP implementation backed by a configurable GraphQL endpoint.
 final class HttpGraphqlCountriesRemoteDataSource
     implements GraphqlCountriesRemoteDataSource {
   /// Creates a GraphQL countries remote source.
-  const HttpGraphqlCountriesRemoteDataSource({required http.Client client})
-      : _client = client;
+  const HttpGraphqlCountriesRemoteDataSource({
+    required this.executor,
+    required this.graphqlUri,
+  });
 
-  final http.Client _client;
+  /// Shared GraphQL executor.
+  final GraphqlRequestExecutor executor;
 
-  static final Uri _countriesUri = Uri.https("countries.trevorblades.com", "/");
+  /// Configured GraphQL endpoint.
+  final Uri graphqlUri;
 
   static const String _countriesQuery = """
     query Countries {
@@ -78,37 +83,19 @@ final class HttpGraphqlCountriesRemoteDataSource
 
   @override
   Future<List<GraphqlCountry>> fetchCountries({int limit = 6}) async {
-    final response = await _client.post(
-      _countriesUri,
-      headers: const {"Content-Type": "application/json"},
-      body: jsonEncode({"query": _countriesQuery}),
+    final data = await executor.execute(
+      uri: graphqlUri,
+      document: _countriesQuery,
+      operationName: "Countries",
     );
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw http.ClientException(
-        "GraphQL request failed with status ${response.statusCode}",
-        _countriesUri,
-      );
+    final countries = data["countries"];
+    if (countries is! List<Object?>) {
+      throw const NetworkException.invalidPayload("graphql.countries");
     }
-
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-    final errors = decoded["errors"];
-    if (errors is List && errors.isNotEmpty) {
-      throw FormatException("GraphQL returned errors", errors);
-    }
-
-    final data = decoded["data"] as Map<String, dynamic>;
-    final countries = data["countries"] as List<dynamic>;
     return countries
-        .cast<Map<String, dynamic>>()
         .take(limit)
-        .map(
-          (item) => GraphqlCountry(
-            code: item["code"] as String,
-            name: item["name"] as String,
-            emoji: item["emoji"] as String,
-            capital: item["capital"] as String?,
-          ),
-        )
+        .map(GraphqlCountryDto.fromJson)
+        .map((dto) => dto.toDomain())
         .toList();
   }
 }

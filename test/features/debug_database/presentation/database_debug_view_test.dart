@@ -15,11 +15,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: DatabaseDebugView(
-          viewModel: viewModel,
-        ),
-      ),
+      MaterialApp(home: DatabaseDebugView(viewModel: viewModel)),
     );
     await tester.pump();
 

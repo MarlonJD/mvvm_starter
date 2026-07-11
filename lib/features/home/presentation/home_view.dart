@@ -52,13 +52,6 @@ final class HomeView extends StatelessWidget {
                   "home.welcome".tr(args: [user?.name ?? ""]),
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
-                if (user?.isAdmin ?? false)
-                  TextButton(
-                    onPressed: () async {
-                      await viewModel.deleteAllUsers();
-                    },
-                    child: Text("home.deleteAllUsers".tr()),
-                  ),
                 TextButton(
                   key: logoutButtonKey,
                   onPressed: () async {

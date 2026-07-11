@@ -35,11 +35,11 @@ void main() {
     expect(result.errorOrNull?.type, AppErrorType.validation);
   });
 
-  test("admin name marks the example user as admin", () async {
+  test("admin display name creates an ordinary local user", () async {
     viewModel.nameController.value.text = "admin";
 
     final result = await viewModel.createUser();
 
-    expect(result.valueOrNull?.isAdmin, isTrue);
+    expect(result.valueOrNull?.name, "admin");
   });
 }

@@ -16,11 +16,6 @@ class Users extends Table {
   /// Unique display/login name.
   TextColumn get name => text().unique()();
 
-  /// Example admin flag.
-  BoolColumn get isAdmin => boolean()
-      .named("is_admin")
-      .customConstraint("NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1))")();
-
   /// Creation timestamp.
   DateTimeColumn get createdAt => dateTime().named("created_at")();
 
@@ -45,6 +40,9 @@ class AppSessions extends Table {
 
   /// Last update timestamp.
   DateTimeColumn get updatedAt => dateTime().named("updated_at")();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
 }
 
 /// REST posts persisted by the network examples feature.
@@ -92,14 +90,7 @@ class GraphqlCountries extends Table {
 }
 
 /// Drift database for app/domain data.
-@DriftDatabase(
-  tables: [
-    Users,
-    AppSessions,
-    RestPosts,
-    GraphqlCountries,
-  ],
-)
+@DriftDatabase(tables: [Users, AppSessions, RestPosts, GraphqlCountries])
 class AppDatabase extends _$AppDatabase {
   /// Opens the database with [executor].
   AppDatabase(super.executor);
@@ -108,7 +99,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => appMigrationStrategy(this);

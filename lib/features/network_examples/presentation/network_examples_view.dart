@@ -2,6 +2,8 @@ import "dart:async";
 
 import "package:easy_localization/easy_localization.dart";
 import "package:flutter/material.dart";
+import "package:go_router/go_router.dart";
+import "package:mvvm_starter/app/routes.dart";
 import "package:mvvm_starter/core/result/ui_state.dart";
 import "package:mvvm_starter/features/network_examples/domain/network_example_models.dart";
 import "package:mvvm_starter/features/network_examples/presentation/network_examples_view_model.dart";
@@ -34,6 +36,13 @@ final class _NetworkExamplesViewState extends State<NetworkExamplesView> {
         title: Text("networkExamples.title".tr()),
         actions: [
           IconButton(
+            tooltip: "networkExamples.oidc.open".tr(),
+            onPressed: () {
+              context.pushNamed(AppRoute.oidcExample.name);
+            },
+            icon: const Icon(Icons.verified_user_outlined),
+          ),
+          IconButton(
             tooltip: "networkExamples.refresh".tr(),
             onPressed: () {
               unawaited(viewModel.load());
@@ -48,14 +57,14 @@ final class _NetworkExamplesViewState extends State<NetworkExamplesView> {
           return switch (state) {
             UiIdle<NetworkExamplesState>() => const SizedBox.shrink(),
             UiLoading<NetworkExamplesState>() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: CircularProgressIndicator(),
+            ),
             UiFailure<NetworkExamplesState>(:final error) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(error.messageKey.tr()),
-                ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(error.messageKey.tr()),
               ),
+            ),
             UiSuccess<NetworkExamplesState>(:final value) =>
               _NetworkExamplesContent(state: value),
           };
@@ -72,9 +81,7 @@ final class _NetworkExamplesViewState extends State<NetworkExamplesView> {
 }
 
 final class _NetworkExamplesContent extends StatelessWidget {
-  const _NetworkExamplesContent({
-    required this.state,
-  });
+  const _NetworkExamplesContent({required this.state});
 
   final NetworkExamplesState state;
 

@@ -24,6 +24,7 @@ void main() {
       homeBuilder: (context, state) => const SizedBox(key: Key("home")),
       networkExamplesBuilder: (context, state) =>
           const SizedBox(key: Key("network")),
+      oidcExampleBuilder: (context, state) => const SizedBox(key: Key("oidc")),
       loginBuilder: (context, state) => const SizedBox(key: Key("login")),
       signupBuilder: (context, state) => const SizedBox(key: Key("signup")),
       debugDatabaseBuilder: (context, state) =>
@@ -95,5 +96,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key("network")), findsOneWidget);
+  });
+
+  testWidgets("authenticated OIDC example route is available", (tester) async {
+    await repository.createUser("alice");
+    routerService.router.go(AppRoute.oidcExample.path);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        color: const Color(0xffffffff),
+        routerConfig: routerService.router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key("oidc")), findsOneWidget);
   });
 }

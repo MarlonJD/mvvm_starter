@@ -32,6 +32,7 @@ void main() {
           repository: NetworkExamplesRepository.fake(),
         ),
       ),
+      oidcExampleBuilder: (context, state) => const SizedBox.shrink(),
       loginBuilder: (context, state) => LoginView(
         viewModel: LoginViewModel(authRepository: harness.repository),
       ),
@@ -57,5 +58,50 @@ void main() {
 
     expect(harness.repository.activeUser.value, isNull);
     expect(find.text("Login"), findsWidgets);
+  });
+
+  testWidgets("admin display name does not expose delete-all authority", (
+    tester,
+  ) async {
+    final harness = createTestAuthHarness();
+    addTearDown(harness.dispose);
+    final signupViewModel = SignupViewModel(
+      authRepository: harness.repository,
+    );
+    addTearDown(signupViewModel.dispose);
+    signupViewModel.nameController.value.text = "admin";
+    await signupViewModel.createUser();
+
+    final routerService = RouterService(
+      authRepository: harness.repository,
+      homeBuilder: (context, state) => HomeView(
+        viewModel: HomeViewModel(authRepository: harness.repository),
+      ),
+      networkExamplesBuilder: (context, state) => NetworkExamplesView(
+        viewModel: NetworkExamplesViewModel(
+          repository: NetworkExamplesRepository.fake(),
+        ),
+      ),
+      oidcExampleBuilder: (context, state) => const SizedBox.shrink(),
+      loginBuilder: (context, state) => LoginView(
+        viewModel: LoginViewModel(authRepository: harness.repository),
+      ),
+      signupBuilder: (context, state) => SignupView(
+        viewModel: SignupViewModel(authRepository: harness.repository),
+      ),
+      debugDatabaseBuilder: (context, state) => DatabaseDebugView(
+        viewModel: DatabaseDebugViewModel(authRepository: harness.repository),
+      ),
+    );
+    addTearDown(routerService.dispose);
+    routerService.router.go(AppRoute.home.path);
+
+    await tester.pumpWidget(
+      MaterialApp.router(routerConfig: routerService.router),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text("Welcome, admin"), findsOneWidget);
+    expect(find.text("Delete All Users"), findsNothing);
   });
 }

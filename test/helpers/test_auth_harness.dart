@@ -4,10 +4,7 @@ import "package:mvvm_starter/features/auth/data/auth_local_datasource.dart";
 import "package:mvvm_starter/features/auth/data/auth_repository.dart";
 
 final class TestAuthHarness {
-  TestAuthHarness({
-    required this.database,
-    required this.repository,
-  });
+  TestAuthHarness({required this.database, required this.repository});
 
   final AppDatabase database;
   final AuthRepository repository;

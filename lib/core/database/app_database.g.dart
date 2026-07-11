@@ -11,58 +11,70 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _uidMeta = const VerificationMeta('uid');
   @override
   late final GeneratedColumn<String> uid = GeneratedColumn<String>(
-      'uid', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+    'uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
-  static const VerificationMeta _isAdminMeta =
-      const VerificationMeta('isAdmin');
-  @override
-  late final GeneratedColumn<bool> isAdmin = GeneratedColumn<bool>(
-      'is_admin', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: 'NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1))',
-      defaultValue: const CustomExpression('0'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, uid, name, isAdmin, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [id, uid, name, createdAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'users';
   @override
-  VerificationContext validateIntegrity(Insertable<UserRow> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<UserRow> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -70,29 +82,33 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
     }
     if (data.containsKey('uid')) {
       context.handle(
-          _uidMeta, uid.isAcceptableOrUnknown(data['uid']!, _uidMeta));
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     } else if (isInserting) {
       context.missing(_uidMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('is_admin')) {
-      context.handle(_isAdminMeta,
-          isAdmin.isAcceptableOrUnknown(data['is_admin']!, _isAdminMeta));
-    }
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
@@ -105,18 +121,26 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
   UserRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UserRow(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      uid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}uid'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      isAdmin: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_admin'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -136,28 +160,24 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   /// Unique display/login name.
   final String name;
 
-  /// Example admin flag.
-  final bool isAdmin;
-
   /// Creation timestamp.
   final DateTime createdAt;
 
   /// Last update timestamp.
   final DateTime updatedAt;
-  const UserRow(
-      {required this.id,
-      required this.uid,
-      required this.name,
-      required this.isAdmin,
-      required this.createdAt,
-      required this.updatedAt});
+  const UserRow({
+    required this.id,
+    required this.uid,
+    required this.name,
+    required this.createdAt,
+    required this.updatedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['uid'] = Variable<String>(uid);
     map['name'] = Variable<String>(name);
-    map['is_admin'] = Variable<bool>(isAdmin);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -168,20 +188,20 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       id: Value(id),
       uid: Value(uid),
       name: Value(name),
-      isAdmin: Value(isAdmin),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
   }
 
-  factory UserRow.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory UserRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserRow(
       id: serializer.fromJson<int>(json['id']),
       uid: serializer.fromJson<String>(json['uid']),
       name: serializer.fromJson<String>(json['name']),
-      isAdmin: serializer.fromJson<bool>(json['isAdmin']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -193,33 +213,29 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       'id': serializer.toJson<int>(id),
       'uid': serializer.toJson<String>(uid),
       'name': serializer.toJson<String>(name),
-      'isAdmin': serializer.toJson<bool>(isAdmin),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
-  UserRow copyWith(
-          {int? id,
-          String? uid,
-          String? name,
-          bool? isAdmin,
-          DateTime? createdAt,
-          DateTime? updatedAt}) =>
-      UserRow(
-        id: id ?? this.id,
-        uid: uid ?? this.uid,
-        name: name ?? this.name,
-        isAdmin: isAdmin ?? this.isAdmin,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-      );
+  UserRow copyWith({
+    int? id,
+    String? uid,
+    String? name,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => UserRow(
+    id: id ?? this.id,
+    uid: uid ?? this.uid,
+    name: name ?? this.name,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
   UserRow copyWithCompanion(UsersCompanion data) {
     return UserRow(
       id: data.id.present ? data.id.value : this.id,
       uid: data.uid.present ? data.uid.value : this.uid,
       name: data.name.present ? data.name.value : this.name,
-      isAdmin: data.isAdmin.present ? data.isAdmin.value : this.isAdmin,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -231,7 +247,6 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           ..write('id: $id, ')
           ..write('uid: $uid, ')
           ..write('name: $name, ')
-          ..write('isAdmin: $isAdmin, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -239,7 +254,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   }
 
   @override
-  int get hashCode => Object.hash(id, uid, name, isAdmin, createdAt, updatedAt);
+  int get hashCode => Object.hash(id, uid, name, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -247,7 +262,6 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           other.id == this.id &&
           other.uid == this.uid &&
           other.name == this.name &&
-          other.isAdmin == this.isAdmin &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -256,14 +270,12 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   final Value<int> id;
   final Value<String> uid;
   final Value<String> name;
-  final Value<bool> isAdmin;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.uid = const Value.absent(),
     this.name = const Value.absent(),
-    this.isAdmin = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -271,18 +283,16 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     this.id = const Value.absent(),
     required String uid,
     required String name,
-    this.isAdmin = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
-  })  : uid = Value(uid),
-        name = Value(name),
-        createdAt = Value(createdAt),
-        updatedAt = Value(updatedAt);
+  }) : uid = Value(uid),
+       name = Value(name),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<UserRow> custom({
     Expression<int>? id,
     Expression<String>? uid,
     Expression<String>? name,
-    Expression<bool>? isAdmin,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -290,24 +300,22 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
       if (id != null) 'id': id,
       if (uid != null) 'uid': uid,
       if (name != null) 'name': name,
-      if (isAdmin != null) 'is_admin': isAdmin,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
-  UsersCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? uid,
-      Value<String>? name,
-      Value<bool>? isAdmin,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt}) {
+  UsersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uid,
+    Value<String>? name,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
     return UsersCompanion(
       id: id ?? this.id,
       uid: uid ?? this.uid,
       name: name ?? this.name,
-      isAdmin: isAdmin ?? this.isAdmin,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -325,9 +333,6 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (isAdmin.present) {
-      map['is_admin'] = Variable<bool>(isAdmin.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -343,7 +348,6 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
           ..write('id: $id, ')
           ..write('uid: $uid, ')
           ..write('name: $name, ')
-          ..write('isAdmin: $isAdmin, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -360,30 +364,47 @@ class $AppSessionsTable extends AppSessions
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL CHECK (id = 1)');
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL CHECK (id = 1)',
+  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<int> userId = GeneratedColumn<int>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'UNIQUE REFERENCES users (id) ON DELETE CASCADE'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'UNIQUE REFERENCES users (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, userId, createdAt, updatedAt];
   @override
@@ -392,30 +413,36 @@ class $AppSessionsTable extends AppSessions
   String get actualTableName => $name;
   static const String $name = 'app_sessions';
   @override
-  VerificationContext validateIntegrity(Insertable<AppSessionRow> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<AppSessionRow> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
     }
     if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
@@ -423,19 +450,27 @@ class $AppSessionsTable extends AppSessions
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   AppSessionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AppSessionRow(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}user_id'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -457,11 +492,12 @@ class AppSessionRow extends DataClass implements Insertable<AppSessionRow> {
 
   /// Last update timestamp.
   final DateTime updatedAt;
-  const AppSessionRow(
-      {required this.id,
-      required this.userId,
-      required this.createdAt,
-      required this.updatedAt});
+  const AppSessionRow({
+    required this.id,
+    required this.userId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -481,8 +517,10 @@ class AppSessionRow extends DataClass implements Insertable<AppSessionRow> {
     );
   }
 
-  factory AppSessionRow.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory AppSessionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AppSessionRow(
       id: serializer.fromJson<int>(json['id']),
@@ -502,14 +540,17 @@ class AppSessionRow extends DataClass implements Insertable<AppSessionRow> {
     };
   }
 
-  AppSessionRow copyWith(
-          {int? id, int? userId, DateTime? createdAt, DateTime? updatedAt}) =>
-      AppSessionRow(
-        id: id ?? this.id,
-        userId: userId ?? this.userId,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-      );
+  AppSessionRow copyWith({
+    int? id,
+    int? userId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AppSessionRow(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
   AppSessionRow copyWithCompanion(AppSessionsCompanion data) {
     return AppSessionRow(
       id: data.id.present ? data.id.value : this.id,
@@ -547,52 +588,45 @@ class AppSessionsCompanion extends UpdateCompanion<AppSessionRow> {
   final Value<int> userId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  final Value<int> rowid;
   const AppSessionsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   AppSessionsCompanion.insert({
-    required int id,
+    this.id = const Value.absent(),
     required int userId,
     required DateTime createdAt,
     required DateTime updatedAt,
-    this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        userId = Value(userId),
-        createdAt = Value(createdAt),
-        updatedAt = Value(updatedAt);
+  }) : userId = Value(userId),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<AppSessionRow> custom({
     Expression<int>? id,
     Expression<int>? userId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  AppSessionsCompanion copyWith(
-      {Value<int>? id,
-      Value<int>? userId,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt,
-      Value<int>? rowid}) {
+  AppSessionsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? userId,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
     return AppSessionsCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -611,9 +645,6 @@ class AppSessionsCompanion extends UpdateCompanion<AppSessionRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
@@ -623,8 +654,7 @@ class AppSessionsCompanion extends UpdateCompanion<AppSessionRow> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('rowid: $rowid')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -639,29 +669,50 @@ class $RestPostsTable extends RestPosts
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<int> userId = GeneratedColumn<int>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _bodyMeta = const VerificationMeta('body');
   @override
   late final GeneratedColumn<String> body = GeneratedColumn<String>(
-      'body', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _fetchedAtMeta =
-      const VerificationMeta('fetchedAt');
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
-      'fetched_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, userId, title, body, fetchedAt];
   @override
@@ -670,34 +721,44 @@ class $RestPostsTable extends RestPosts
   String get actualTableName => $name;
   static const String $name = 'rest_posts';
   @override
-  VerificationContext validateIntegrity(Insertable<RestPostRow> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<RestPostRow> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
     if (data.containsKey('body')) {
       context.handle(
-          _bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
     } else if (isInserting) {
       context.missing(_bodyMeta);
     }
     if (data.containsKey('fetched_at')) {
-      context.handle(_fetchedAtMeta,
-          fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta));
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_fetchedAtMeta);
     }
@@ -710,16 +771,26 @@ class $RestPostsTable extends RestPosts
   RestPostRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RestPostRow(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}user_id'])!,
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      body: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
-      fetchedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}fetched_at'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
     );
   }
 
@@ -744,12 +815,13 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
 
   /// Last network fetch timestamp.
   final DateTime fetchedAt;
-  const RestPostRow(
-      {required this.id,
-      required this.userId,
-      required this.title,
-      required this.body,
-      required this.fetchedAt});
+  const RestPostRow({
+    required this.id,
+    required this.userId,
+    required this.title,
+    required this.body,
+    required this.fetchedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -771,8 +843,10 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
     );
   }
 
-  factory RestPostRow.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory RestPostRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RestPostRow(
       id: serializer.fromJson<int>(json['id']),
@@ -794,19 +868,19 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
     };
   }
 
-  RestPostRow copyWith(
-          {int? id,
-          int? userId,
-          String? title,
-          String? body,
-          DateTime? fetchedAt}) =>
-      RestPostRow(
-        id: id ?? this.id,
-        userId: userId ?? this.userId,
-        title: title ?? this.title,
-        body: body ?? this.body,
-        fetchedAt: fetchedAt ?? this.fetchedAt,
-      );
+  RestPostRow copyWith({
+    int? id,
+    int? userId,
+    String? title,
+    String? body,
+    DateTime? fetchedAt,
+  }) => RestPostRow(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    title: title ?? this.title,
+    body: body ?? this.body,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
   RestPostRow copyWithCompanion(RestPostsCompanion data) {
     return RestPostRow(
       id: data.id.present ? data.id.value : this.id,
@@ -861,10 +935,10 @@ class RestPostsCompanion extends UpdateCompanion<RestPostRow> {
     required String title,
     required String body,
     required DateTime fetchedAt,
-  })  : userId = Value(userId),
-        title = Value(title),
-        body = Value(body),
-        fetchedAt = Value(fetchedAt);
+  }) : userId = Value(userId),
+       title = Value(title),
+       body = Value(body),
+       fetchedAt = Value(fetchedAt);
   static Insertable<RestPostRow> custom({
     Expression<int>? id,
     Expression<int>? userId,
@@ -881,12 +955,13 @@ class RestPostsCompanion extends UpdateCompanion<RestPostRow> {
     });
   }
 
-  RestPostsCompanion copyWith(
-      {Value<int>? id,
-      Value<int>? userId,
-      Value<String>? title,
-      Value<String>? body,
-      Value<DateTime>? fetchedAt}) {
+  RestPostsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? userId,
+    Value<String>? title,
+    Value<String>? body,
+    Value<DateTime>? fetchedAt,
+  }) {
     return RestPostsCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -939,30 +1014,52 @@ class $GraphqlCountriesTable extends GraphqlCountries
   static const VerificationMeta _codeMeta = const VerificationMeta('code');
   @override
   late final GeneratedColumn<String> code = GeneratedColumn<String>(
-      'code', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _emojiMeta = const VerificationMeta('emoji');
   @override
   late final GeneratedColumn<String> emoji = GeneratedColumn<String>(
-      'emoji', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _capitalMeta =
-      const VerificationMeta('capital');
+    'emoji',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _capitalMeta = const VerificationMeta(
+    'capital',
+  );
   @override
   late final GeneratedColumn<String> capital = GeneratedColumn<String>(
-      'capital', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _fetchedAtMeta =
-      const VerificationMeta('fetchedAt');
+    'capital',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
-      'fetched_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [code, name, emoji, capital, fetchedAt];
   @override
@@ -971,35 +1068,47 @@ class $GraphqlCountriesTable extends GraphqlCountries
   String get actualTableName => $name;
   static const String $name = 'graphql_countries';
   @override
-  VerificationContext validateIntegrity(Insertable<GraphqlCountryRow> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<GraphqlCountryRow> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('code')) {
       context.handle(
-          _codeMeta, code.isAcceptableOrUnknown(data['code']!, _codeMeta));
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
     } else if (isInserting) {
       context.missing(_codeMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('emoji')) {
       context.handle(
-          _emojiMeta, emoji.isAcceptableOrUnknown(data['emoji']!, _emojiMeta));
+        _emojiMeta,
+        emoji.isAcceptableOrUnknown(data['emoji']!, _emojiMeta),
+      );
     } else if (isInserting) {
       context.missing(_emojiMeta);
     }
     if (data.containsKey('capital')) {
-      context.handle(_capitalMeta,
-          capital.isAcceptableOrUnknown(data['capital']!, _capitalMeta));
+      context.handle(
+        _capitalMeta,
+        capital.isAcceptableOrUnknown(data['capital']!, _capitalMeta),
+      );
     }
     if (data.containsKey('fetched_at')) {
-      context.handle(_fetchedAtMeta,
-          fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta));
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_fetchedAtMeta);
     }
@@ -1012,16 +1121,26 @@ class $GraphqlCountriesTable extends GraphqlCountries
   GraphqlCountryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return GraphqlCountryRow(
-      code: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      emoji: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}emoji'])!,
-      capital: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}capital']),
-      fetchedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}fetched_at'])!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      emoji: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}emoji'],
+      )!,
+      capital: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}capital'],
+      ),
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
     );
   }
 
@@ -1047,12 +1166,13 @@ class GraphqlCountryRow extends DataClass
 
   /// Last network fetch timestamp.
   final DateTime fetchedAt;
-  const GraphqlCountryRow(
-      {required this.code,
-      required this.name,
-      required this.emoji,
-      this.capital,
-      required this.fetchedAt});
+  const GraphqlCountryRow({
+    required this.code,
+    required this.name,
+    required this.emoji,
+    this.capital,
+    required this.fetchedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1078,8 +1198,10 @@ class GraphqlCountryRow extends DataClass
     );
   }
 
-  factory GraphqlCountryRow.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory GraphqlCountryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GraphqlCountryRow(
       code: serializer.fromJson<String>(json['code']),
@@ -1101,19 +1223,19 @@ class GraphqlCountryRow extends DataClass
     };
   }
 
-  GraphqlCountryRow copyWith(
-          {String? code,
-          String? name,
-          String? emoji,
-          Value<String?> capital = const Value.absent(),
-          DateTime? fetchedAt}) =>
-      GraphqlCountryRow(
-        code: code ?? this.code,
-        name: name ?? this.name,
-        emoji: emoji ?? this.emoji,
-        capital: capital.present ? capital.value : this.capital,
-        fetchedAt: fetchedAt ?? this.fetchedAt,
-      );
+  GraphqlCountryRow copyWith({
+    String? code,
+    String? name,
+    String? emoji,
+    Value<String?> capital = const Value.absent(),
+    DateTime? fetchedAt,
+  }) => GraphqlCountryRow(
+    code: code ?? this.code,
+    name: name ?? this.name,
+    emoji: emoji ?? this.emoji,
+    capital: capital.present ? capital.value : this.capital,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
   GraphqlCountryRow copyWithCompanion(GraphqlCountriesCompanion data) {
     return GraphqlCountryRow(
       code: data.code.present ? data.code.value : this.code,
@@ -1171,10 +1293,10 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
     this.capital = const Value.absent(),
     required DateTime fetchedAt,
     this.rowid = const Value.absent(),
-  })  : code = Value(code),
-        name = Value(name),
-        emoji = Value(emoji),
-        fetchedAt = Value(fetchedAt);
+  }) : code = Value(code),
+       name = Value(name),
+       emoji = Value(emoji),
+       fetchedAt = Value(fetchedAt);
   static Insertable<GraphqlCountryRow> custom({
     Expression<String>? code,
     Expression<String>? name,
@@ -1193,13 +1315,14 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
     });
   }
 
-  GraphqlCountriesCompanion copyWith(
-      {Value<String>? code,
-      Value<String>? name,
-      Value<String>? emoji,
-      Value<String?>? capital,
-      Value<DateTime>? fetchedAt,
-      Value<int>? rowid}) {
+  GraphqlCountriesCompanion copyWith({
+    Value<String>? code,
+    Value<String>? name,
+    Value<String>? emoji,
+    Value<String?>? capital,
+    Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
+  }) {
     return GraphqlCountriesCompanion(
       code: code ?? this.code,
       name: name ?? this.name,
@@ -1254,61 +1377,68 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UsersTable users = $UsersTable(this);
   late final $AppSessionsTable appSessions = $AppSessionsTable(this);
   late final $RestPostsTable restPosts = $RestPostsTable(this);
-  late final $GraphqlCountriesTable graphqlCountries =
-      $GraphqlCountriesTable(this);
+  late final $GraphqlCountriesTable graphqlCountries = $GraphqlCountriesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, appSessions, restPosts, graphqlCountries];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    users,
+    appSessions,
+    restPosts,
+    graphqlCountries,
+  ];
   @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
-        [
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('users',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('app_sessions', kind: UpdateKind.delete),
-            ],
-          ),
-        ],
-      );
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'users',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('app_sessions', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
-typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
-  Value<int> id,
-  required String uid,
-  required String name,
-  Value<bool> isAdmin,
-  required DateTime createdAt,
-  required DateTime updatedAt,
-});
-typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
-  Value<int> id,
-  Value<String> uid,
-  Value<String> name,
-  Value<bool> isAdmin,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
-});
+typedef $$UsersTableCreateCompanionBuilder =
+    UsersCompanion Function({
+      Value<int> id,
+      required String uid,
+      required String name,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+    });
+typedef $$UsersTableUpdateCompanionBuilder =
+    UsersCompanion Function({
+      Value<int> id,
+      Value<String> uid,
+      Value<String> name,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
 
 final class $$UsersTableReferences
     extends BaseReferences<_$AppDatabase, $UsersTable, UserRow> {
   $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<$AppSessionsTable, List<AppSessionRow>>
-      _appSessionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-          db.appSessions,
-          aliasName: $_aliasNameGenerator(db.users.id, db.appSessions.userId));
+  _appSessionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.appSessions,
+    aliasName: 'users__id__app_sessions__user_id',
+  );
 
   $$AppSessionsTableProcessedTableManager get appSessionsRefs {
-    final manager = $$AppSessionsTableTableManager($_db, $_db.appSessions)
-        .filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+    final manager = $$AppSessionsTableTableManager(
+      $_db,
+      $_db.appSessions,
+    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_appSessionsRefsTable($_db));
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -1321,41 +1451,52 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get uid => $composableBuilder(
-      column: $table.uid, builder: (column) => ColumnFilters(column));
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get isAdmin => $composableBuilder(
-      column: $table.isAdmin, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> appSessionsRefs(
-      Expression<bool> Function($$AppSessionsTableFilterComposer f) f) {
+    Expression<bool> Function($$AppSessionsTableFilterComposer f) f,
+  ) {
     final $$AppSessionsTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.appSessions,
-        getReferencedColumn: (t) => t.userId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AppSessionsTableFilterComposer(
-              $db: $db,
-              $table: $db.appSessions,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.appSessions,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AppSessionsTableFilterComposer(
+            $db: $db,
+            $table: $db.appSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -1370,22 +1511,29 @@ class $$UsersTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get uid => $composableBuilder(
-      column: $table.uid, builder: (column) => ColumnOrderings(column));
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<bool> get isAdmin => $composableBuilder(
-      column: $table.isAdmin, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -1406,9 +1554,6 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<bool> get isAdmin =>
-      $composableBuilder(column: $table.isAdmin, builder: (column) => column);
-
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -1416,41 +1561,49 @@ class $$UsersTableAnnotationComposer
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   Expression<T> appSessionsRefs<T extends Object>(
-      Expression<T> Function($$AppSessionsTableAnnotationComposer a) f) {
+    Expression<T> Function($$AppSessionsTableAnnotationComposer a) f,
+  ) {
     final $$AppSessionsTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.appSessions,
-        getReferencedColumn: (t) => t.userId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AppSessionsTableAnnotationComposer(
-              $db: $db,
-              $table: $db.appSessions,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.appSessions,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AppSessionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.appSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
 
-class $$UsersTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $UsersTable,
-    UserRow,
-    $$UsersTableFilterComposer,
-    $$UsersTableOrderingComposer,
-    $$UsersTableAnnotationComposer,
-    $$UsersTableCreateCompanionBuilder,
-    $$UsersTableUpdateCompanionBuilder,
-    (UserRow, $$UsersTableReferences),
-    UserRow,
-    PrefetchHooks Function({bool appSessionsRefs})> {
+class $$UsersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UsersTable,
+          UserRow,
+          $$UsersTableFilterComposer,
+          $$UsersTableOrderingComposer,
+          $$UsersTableAnnotationComposer,
+          $$UsersTableCreateCompanionBuilder,
+          $$UsersTableUpdateCompanionBuilder,
+          (UserRow, $$UsersTableReferences),
+          UserRow,
+          PrefetchHooks Function({bool appSessionsRefs})
+        > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1459,41 +1612,39 @@ class $$UsersTableTableManager extends RootTableManager<
               $$UsersTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$UsersTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> uid = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<bool> isAdmin = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
-          }) =>
-              UsersCompanion(
-            id: id,
-            uid: uid,
-            name: name,
-            isAdmin: isAdmin,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String uid,
-            required String name,
-            Value<bool> isAdmin = const Value.absent(),
-            required DateTime createdAt,
-            required DateTime updatedAt,
-          }) =>
-              UsersCompanion.insert(
-            id: id,
-            uid: uid,
-            name: name,
-            isAdmin: isAdmin,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uid = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => UsersCompanion(
+                id: id,
+                uid: uid,
+                name: name,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String uid,
+                required String name,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+              }) => UsersCompanion.insert(
+                id: id,
+                uid: uid,
+                name: name,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $$UsersTableReferences(db, table, e)))
+              .map(
+                (e) =>
+                    (e.readTable(table), $$UsersTableReferences(db, table, e)),
+              )
               .toList(),
           prefetchHooksCallback: ({appSessionsRefs = false}) {
             return PrefetchHooks(
@@ -1503,70 +1654,76 @@ class $$UsersTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (appSessionsRefs)
-                    await $_getPrefetchedData<UserRow, $UsersTable,
-                            AppSessionRow>(
-                        currentTable: table,
-                        referencedTable:
-                            $$UsersTableReferences._appSessionsRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$UsersTableReferences(db, table, p0)
-                                .appSessionsRefs,
-                        referencedItemsForCurrentItem: (item,
-                                referencedItems) =>
-                            referencedItems.where((e) => e.userId == item.id),
-                        typedResults: items)
+                    await $_getPrefetchedData<
+                      UserRow,
+                      $UsersTable,
+                      AppSessionRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$UsersTableReferences
+                          ._appSessionsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$UsersTableReferences(db, table, p0).appSessionsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.userId == item.id),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $UsersTable,
-    UserRow,
-    $$UsersTableFilterComposer,
-    $$UsersTableOrderingComposer,
-    $$UsersTableAnnotationComposer,
-    $$UsersTableCreateCompanionBuilder,
-    $$UsersTableUpdateCompanionBuilder,
-    (UserRow, $$UsersTableReferences),
-    UserRow,
-    PrefetchHooks Function({bool appSessionsRefs})>;
-typedef $$AppSessionsTableCreateCompanionBuilder = AppSessionsCompanion
-    Function({
-  required int id,
-  required int userId,
-  required DateTime createdAt,
-  required DateTime updatedAt,
-  Value<int> rowid,
-});
-typedef $$AppSessionsTableUpdateCompanionBuilder = AppSessionsCompanion
-    Function({
-  Value<int> id,
-  Value<int> userId,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
-  Value<int> rowid,
-});
+typedef $$UsersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UsersTable,
+      UserRow,
+      $$UsersTableFilterComposer,
+      $$UsersTableOrderingComposer,
+      $$UsersTableAnnotationComposer,
+      $$UsersTableCreateCompanionBuilder,
+      $$UsersTableUpdateCompanionBuilder,
+      (UserRow, $$UsersTableReferences),
+      UserRow,
+      PrefetchHooks Function({bool appSessionsRefs})
+    >;
+typedef $$AppSessionsTableCreateCompanionBuilder =
+    AppSessionsCompanion Function({
+      Value<int> id,
+      required int userId,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+    });
+typedef $$AppSessionsTableUpdateCompanionBuilder =
+    AppSessionsCompanion Function({
+      Value<int> id,
+      Value<int> userId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
 
 final class $$AppSessionsTableReferences
     extends BaseReferences<_$AppDatabase, $AppSessionsTable, AppSessionRow> {
   $$AppSessionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $UsersTable _userIdTable(_$AppDatabase db) => db.users
-      .createAlias($_aliasNameGenerator(db.appSessions.userId, db.users.id));
+  static $UsersTable _userIdTable(_$AppDatabase db) =>
+      db.users.createAlias('app_sessions__user_id__users__id');
 
   $$UsersTableProcessedTableManager get userId {
     final $_column = $_itemColumn<int>('user_id')!;
 
-    final manager = $$UsersTableTableManager($_db, $_db.users)
-        .filter((f) => f.id.sqlEquals($_column));
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_userIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -1580,31 +1737,40 @@ class $$AppSessionsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$UsersTableFilterComposer get userId {
     final $$UsersTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.userId,
-        referencedTable: $db.users,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$UsersTableFilterComposer(
-              $db: $db,
-              $table: $db.users,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -1619,31 +1785,40 @@ class $$AppSessionsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$UsersTableOrderingComposer get userId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.userId,
-        referencedTable: $db.users,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$UsersTableOrderingComposer(
-              $db: $db,
-              $table: $db.users,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -1668,39 +1843,46 @@ class $$AppSessionsTableAnnotationComposer
 
   $$UsersTableAnnotationComposer get userId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.userId,
-        referencedTable: $db.users,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$UsersTableAnnotationComposer(
-              $db: $db,
-              $table: $db.users,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
 
-class $$AppSessionsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $AppSessionsTable,
-    AppSessionRow,
-    $$AppSessionsTableFilterComposer,
-    $$AppSessionsTableOrderingComposer,
-    $$AppSessionsTableAnnotationComposer,
-    $$AppSessionsTableCreateCompanionBuilder,
-    $$AppSessionsTableUpdateCompanionBuilder,
-    (AppSessionRow, $$AppSessionsTableReferences),
-    AppSessionRow,
-    PrefetchHooks Function({bool userId})> {
+class $$AppSessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AppSessionsTable,
+          AppSessionRow,
+          $$AppSessionsTableFilterComposer,
+          $$AppSessionsTableOrderingComposer,
+          $$AppSessionsTableAnnotationComposer,
+          $$AppSessionsTableCreateCompanionBuilder,
+          $$AppSessionsTableUpdateCompanionBuilder,
+          (AppSessionRow, $$AppSessionsTableReferences),
+          AppSessionRow,
+          PrefetchHooks Function({bool userId})
+        > {
   $$AppSessionsTableTableManager(_$AppDatabase db, $AppSessionsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1709,46 +1891,45 @@ class $$AppSessionsTableTableManager extends RootTableManager<
               $$AppSessionsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AppSessionsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> userId = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AppSessionsCompanion(
-            id: id,
-            userId: userId,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required int id,
-            required int userId,
-            required DateTime createdAt,
-            required DateTime updatedAt,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AppSessionsCompanion.insert(
-            id: id,
-            userId: userId,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> userId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => AppSessionsCompanion(
+                id: id,
+                userId: userId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int userId,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+              }) => AppSessionsCompanion.insert(
+                id: id,
+                userId: userId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$AppSessionsTableReferences(db, table, e)
-                  ))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AppSessionsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({userId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                  T extends TableManagerState<
+              addJoins:
+                  <
+                    T extends TableManagerState<
                       dynamic,
                       dynamic,
                       dynamic,
@@ -1759,54 +1940,64 @@ class $$AppSessionsTableTableManager extends RootTableManager<
                       dynamic,
                       dynamic,
                       dynamic,
-                      dynamic>>(state) {
-                if (userId) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.userId,
-                    referencedTable:
-                        $$AppSessionsTableReferences._userIdTable(db),
-                    referencedColumn:
-                        $$AppSessionsTableReferences._userIdTable(db).id,
-                  ) as T;
-                }
+                      dynamic
+                    >
+                  >(state) {
+                    if (userId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.userId,
+                                referencedTable: $$AppSessionsTableReferences
+                                    ._userIdTable(db),
+                                referencedColumn: $$AppSessionsTableReferences
+                                    ._userIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $$AppSessionsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $AppSessionsTable,
-    AppSessionRow,
-    $$AppSessionsTableFilterComposer,
-    $$AppSessionsTableOrderingComposer,
-    $$AppSessionsTableAnnotationComposer,
-    $$AppSessionsTableCreateCompanionBuilder,
-    $$AppSessionsTableUpdateCompanionBuilder,
-    (AppSessionRow, $$AppSessionsTableReferences),
-    AppSessionRow,
-    PrefetchHooks Function({bool userId})>;
-typedef $$RestPostsTableCreateCompanionBuilder = RestPostsCompanion Function({
-  Value<int> id,
-  required int userId,
-  required String title,
-  required String body,
-  required DateTime fetchedAt,
-});
-typedef $$RestPostsTableUpdateCompanionBuilder = RestPostsCompanion Function({
-  Value<int> id,
-  Value<int> userId,
-  Value<String> title,
-  Value<String> body,
-  Value<DateTime> fetchedAt,
-});
+typedef $$AppSessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppSessionsTable,
+      AppSessionRow,
+      $$AppSessionsTableFilterComposer,
+      $$AppSessionsTableOrderingComposer,
+      $$AppSessionsTableAnnotationComposer,
+      $$AppSessionsTableCreateCompanionBuilder,
+      $$AppSessionsTableUpdateCompanionBuilder,
+      (AppSessionRow, $$AppSessionsTableReferences),
+      AppSessionRow,
+      PrefetchHooks Function({bool userId})
+    >;
+typedef $$RestPostsTableCreateCompanionBuilder =
+    RestPostsCompanion Function({
+      Value<int> id,
+      required int userId,
+      required String title,
+      required String body,
+      required DateTime fetchedAt,
+    });
+typedef $$RestPostsTableUpdateCompanionBuilder =
+    RestPostsCompanion Function({
+      Value<int> id,
+      Value<int> userId,
+      Value<String> title,
+      Value<String> body,
+      Value<DateTime> fetchedAt,
+    });
 
 class $$RestPostsTableFilterComposer
     extends Composer<_$AppDatabase, $RestPostsTable> {
@@ -1818,19 +2009,29 @@ class $$RestPostsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get userId => $composableBuilder(
-      column: $table.userId, builder: (column) => ColumnFilters(column));
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnFilters(column));
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get body => $composableBuilder(
-      column: $table.body, builder: (column) => ColumnFilters(column));
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
-      column: $table.fetchedAt, builder: (column) => ColumnFilters(column));
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$RestPostsTableOrderingComposer
@@ -1843,19 +2044,29 @@ class $$RestPostsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get userId => $composableBuilder(
-      column: $table.userId, builder: (column) => ColumnOrderings(column));
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnOrderings(column));
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get body => $composableBuilder(
-      column: $table.body, builder: (column) => ColumnOrderings(column));
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
-      column: $table.fetchedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RestPostsTableAnnotationComposer
@@ -1883,20 +2094,27 @@ class $$RestPostsTableAnnotationComposer
       $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
 }
 
-class $$RestPostsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $RestPostsTable,
-    RestPostRow,
-    $$RestPostsTableFilterComposer,
-    $$RestPostsTableOrderingComposer,
-    $$RestPostsTableAnnotationComposer,
-    $$RestPostsTableCreateCompanionBuilder,
-    $$RestPostsTableUpdateCompanionBuilder,
-    (RestPostRow, BaseReferences<_$AppDatabase, $RestPostsTable, RestPostRow>),
-    RestPostRow,
-    PrefetchHooks Function()> {
+class $$RestPostsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RestPostsTable,
+          RestPostRow,
+          $$RestPostsTableFilterComposer,
+          $$RestPostsTableOrderingComposer,
+          $$RestPostsTableAnnotationComposer,
+          $$RestPostsTableCreateCompanionBuilder,
+          $$RestPostsTableUpdateCompanionBuilder,
+          (
+            RestPostRow,
+            BaseReferences<_$AppDatabase, $RestPostsTable, RestPostRow>,
+          ),
+          RestPostRow,
+          PrefetchHooks Function()
+        > {
   $$RestPostsTableTableManager(_$AppDatabase db, $RestPostsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1905,71 +2123,77 @@ class $$RestPostsTableTableManager extends RootTableManager<
               $$RestPostsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$RestPostsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> userId = const Value.absent(),
-            Value<String> title = const Value.absent(),
-            Value<String> body = const Value.absent(),
-            Value<DateTime> fetchedAt = const Value.absent(),
-          }) =>
-              RestPostsCompanion(
-            id: id,
-            userId: userId,
-            title: title,
-            body: body,
-            fetchedAt: fetchedAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required int userId,
-            required String title,
-            required String body,
-            required DateTime fetchedAt,
-          }) =>
-              RestPostsCompanion.insert(
-            id: id,
-            userId: userId,
-            title: title,
-            body: body,
-            fetchedAt: fetchedAt,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> userId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+              }) => RestPostsCompanion(
+                id: id,
+                userId: userId,
+                title: title,
+                body: body,
+                fetchedAt: fetchedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int userId,
+                required String title,
+                required String body,
+                required DateTime fetchedAt,
+              }) => RestPostsCompanion.insert(
+                id: id,
+                userId: userId,
+                title: title,
+                body: body,
+                fetchedAt: fetchedAt,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$RestPostsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $RestPostsTable,
-    RestPostRow,
-    $$RestPostsTableFilterComposer,
-    $$RestPostsTableOrderingComposer,
-    $$RestPostsTableAnnotationComposer,
-    $$RestPostsTableCreateCompanionBuilder,
-    $$RestPostsTableUpdateCompanionBuilder,
-    (RestPostRow, BaseReferences<_$AppDatabase, $RestPostsTable, RestPostRow>),
-    RestPostRow,
-    PrefetchHooks Function()>;
-typedef $$GraphqlCountriesTableCreateCompanionBuilder
-    = GraphqlCountriesCompanion Function({
-  required String code,
-  required String name,
-  required String emoji,
-  Value<String?> capital,
-  required DateTime fetchedAt,
-  Value<int> rowid,
-});
-typedef $$GraphqlCountriesTableUpdateCompanionBuilder
-    = GraphqlCountriesCompanion Function({
-  Value<String> code,
-  Value<String> name,
-  Value<String> emoji,
-  Value<String?> capital,
-  Value<DateTime> fetchedAt,
-  Value<int> rowid,
-});
+typedef $$RestPostsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RestPostsTable,
+      RestPostRow,
+      $$RestPostsTableFilterComposer,
+      $$RestPostsTableOrderingComposer,
+      $$RestPostsTableAnnotationComposer,
+      $$RestPostsTableCreateCompanionBuilder,
+      $$RestPostsTableUpdateCompanionBuilder,
+      (
+        RestPostRow,
+        BaseReferences<_$AppDatabase, $RestPostsTable, RestPostRow>,
+      ),
+      RestPostRow,
+      PrefetchHooks Function()
+    >;
+typedef $$GraphqlCountriesTableCreateCompanionBuilder =
+    GraphqlCountriesCompanion Function({
+      required String code,
+      required String name,
+      required String emoji,
+      Value<String?> capital,
+      required DateTime fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$GraphqlCountriesTableUpdateCompanionBuilder =
+    GraphqlCountriesCompanion Function({
+      Value<String> code,
+      Value<String> name,
+      Value<String> emoji,
+      Value<String?> capital,
+      Value<DateTime> fetchedAt,
+      Value<int> rowid,
+    });
 
 class $$GraphqlCountriesTableFilterComposer
     extends Composer<_$AppDatabase, $GraphqlCountriesTable> {
@@ -1981,19 +2205,29 @@ class $$GraphqlCountriesTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get code => $composableBuilder(
-      column: $table.code, builder: (column) => ColumnFilters(column));
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get emoji => $composableBuilder(
-      column: $table.emoji, builder: (column) => ColumnFilters(column));
+    column: $table.emoji,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get capital => $composableBuilder(
-      column: $table.capital, builder: (column) => ColumnFilters(column));
+    column: $table.capital,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
-      column: $table.fetchedAt, builder: (column) => ColumnFilters(column));
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$GraphqlCountriesTableOrderingComposer
@@ -2006,19 +2240,29 @@ class $$GraphqlCountriesTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get code => $composableBuilder(
-      column: $table.code, builder: (column) => ColumnOrderings(column));
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get emoji => $composableBuilder(
-      column: $table.emoji, builder: (column) => ColumnOrderings(column));
+    column: $table.emoji,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get capital => $composableBuilder(
-      column: $table.capital, builder: (column) => ColumnOrderings(column));
+    column: $table.capital,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
-      column: $table.fetchedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GraphqlCountriesTableAnnotationComposer
@@ -2046,24 +2290,33 @@ class $$GraphqlCountriesTableAnnotationComposer
       $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
 }
 
-class $$GraphqlCountriesTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $GraphqlCountriesTable,
-    GraphqlCountryRow,
-    $$GraphqlCountriesTableFilterComposer,
-    $$GraphqlCountriesTableOrderingComposer,
-    $$GraphqlCountriesTableAnnotationComposer,
-    $$GraphqlCountriesTableCreateCompanionBuilder,
-    $$GraphqlCountriesTableUpdateCompanionBuilder,
-    (
-      GraphqlCountryRow,
-      BaseReferences<_$AppDatabase, $GraphqlCountriesTable, GraphqlCountryRow>
-    ),
-    GraphqlCountryRow,
-    PrefetchHooks Function()> {
+class $$GraphqlCountriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GraphqlCountriesTable,
+          GraphqlCountryRow,
+          $$GraphqlCountriesTableFilterComposer,
+          $$GraphqlCountriesTableOrderingComposer,
+          $$GraphqlCountriesTableAnnotationComposer,
+          $$GraphqlCountriesTableCreateCompanionBuilder,
+          $$GraphqlCountriesTableUpdateCompanionBuilder,
+          (
+            GraphqlCountryRow,
+            BaseReferences<
+              _$AppDatabase,
+              $GraphqlCountriesTable,
+              GraphqlCountryRow
+            >,
+          ),
+          GraphqlCountryRow,
+          PrefetchHooks Function()
+        > {
   $$GraphqlCountriesTableTableManager(
-      _$AppDatabase db, $GraphqlCountriesTable table)
-      : super(TableManagerState(
+    _$AppDatabase db,
+    $GraphqlCountriesTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -2072,60 +2325,67 @@ class $$GraphqlCountriesTableTableManager extends RootTableManager<
               $$GraphqlCountriesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$GraphqlCountriesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> code = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<String> emoji = const Value.absent(),
-            Value<String?> capital = const Value.absent(),
-            Value<DateTime> fetchedAt = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              GraphqlCountriesCompanion(
-            code: code,
-            name: name,
-            emoji: emoji,
-            capital: capital,
-            fetchedAt: fetchedAt,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String code,
-            required String name,
-            required String emoji,
-            Value<String?> capital = const Value.absent(),
-            required DateTime fetchedAt,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              GraphqlCountriesCompanion.insert(
-            code: code,
-            name: name,
-            emoji: emoji,
-            capital: capital,
-            fetchedAt: fetchedAt,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> code = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> emoji = const Value.absent(),
+                Value<String?> capital = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GraphqlCountriesCompanion(
+                code: code,
+                name: name,
+                emoji: emoji,
+                capital: capital,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String code,
+                required String name,
+                required String emoji,
+                Value<String?> capital = const Value.absent(),
+                required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => GraphqlCountriesCompanion.insert(
+                code: code,
+                name: name,
+                emoji: emoji,
+                capital: capital,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$GraphqlCountriesTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $GraphqlCountriesTable,
-    GraphqlCountryRow,
-    $$GraphqlCountriesTableFilterComposer,
-    $$GraphqlCountriesTableOrderingComposer,
-    $$GraphqlCountriesTableAnnotationComposer,
-    $$GraphqlCountriesTableCreateCompanionBuilder,
-    $$GraphqlCountriesTableUpdateCompanionBuilder,
-    (
+typedef $$GraphqlCountriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GraphqlCountriesTable,
       GraphqlCountryRow,
-      BaseReferences<_$AppDatabase, $GraphqlCountriesTable, GraphqlCountryRow>
-    ),
-    GraphqlCountryRow,
-    PrefetchHooks Function()>;
+      $$GraphqlCountriesTableFilterComposer,
+      $$GraphqlCountriesTableOrderingComposer,
+      $$GraphqlCountriesTableAnnotationComposer,
+      $$GraphqlCountriesTableCreateCompanionBuilder,
+      $$GraphqlCountriesTableUpdateCompanionBuilder,
+      (
+        GraphqlCountryRow,
+        BaseReferences<
+          _$AppDatabase,
+          $GraphqlCountriesTable,
+          GraphqlCountryRow
+        >,
+      ),
+      GraphqlCountryRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;

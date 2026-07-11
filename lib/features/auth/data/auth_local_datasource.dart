@@ -13,15 +13,15 @@ final class AuthLocalDataSource {
   Future<User> createUserAndSession({
     required String uid,
     required String name,
-    required bool isAdmin,
     required DateTime now,
   }) {
     return _database.transaction(() async {
-      final id = await _database.into(_database.users).insert(
+      final id = await _database
+          .into(_database.users)
+          .insert(
             UsersCompanion.insert(
               uid: uid,
               name: name,
-              isAdmin: Value(isAdmin),
               createdAt: now,
               updatedAt: now,
             ),
@@ -53,8 +53,9 @@ final class AuthLocalDataSource {
 
   /// Returns the active session user.
   Future<User?> activeUser() async {
-    final session =
-        await _database.select(_database.appSessions).getSingleOrNull();
+    final session = await _database
+        .select(_database.appSessions)
+        .getSingleOrNull();
     if (session == null) {
       return null;
     }
@@ -63,14 +64,12 @@ final class AuthLocalDataSource {
 
   /// Watches the active session user.
   Stream<User?> watchActiveUser() {
-    final query = _database.select(_database.appSessions).join(
-      [
-        innerJoin(
-          _database.users,
-          _database.users.id.equalsExp(_database.appSessions.userId),
-        ),
-      ],
-    );
+    final query = _database.select(_database.appSessions).join([
+      innerJoin(
+        _database.users,
+        _database.users.id.equalsExp(_database.appSessions.userId),
+      ),
+    ]);
 
     return query.watchSingleOrNull().map((row) {
       return row?.readTable(_database.users).toDomain();
@@ -78,15 +77,14 @@ final class AuthLocalDataSource {
   }
 
   /// Replaces the singleton active session.
-  Future<void> replaceSession({
-    required int userId,
-    required DateTime now,
-  }) {
+  Future<void> replaceSession({required int userId, required DateTime now}) {
     return _database.transaction(() async {
       await _database.delete(_database.appSessions).go();
-      await _database.into(_database.appSessions).insert(
+      await _database
+          .into(_database.appSessions)
+          .insert(
             AppSessionsCompanion.insert(
-              id: 1,
+              id: const Value(1),
               userId: userId,
               createdAt: now,
               updatedAt: now,
@@ -102,24 +100,16 @@ final class AuthLocalDataSource {
 
   /// Deletes one user.
   Future<void> deleteUser(User user) async {
-    await (_database.delete(_database.users)
-          ..where((row) => row.id.equals(user.id)))
-        .go();
-  }
-
-  /// Deletes all users and sessions.
-  Future<void> deleteAllUsers() {
-    return _database.transaction(() async {
-      await _database.delete(_database.appSessions).go();
-      await _database.delete(_database.users).go();
-    });
+    await (_database.delete(
+      _database.users,
+    )..where((row) => row.id.equals(user.id))).go();
   }
 
   /// Returns all users.
   Future<List<User>> users() async {
-    final rows = await (_database.select(_database.users)
-          ..orderBy([(row) => OrderingTerm.asc(row.id)]))
-        .get();
+    final rows = await (_database.select(
+      _database.users,
+    )..orderBy([(row) => OrderingTerm.asc(row.id)])).get();
     return rows.map((row) => row.toDomain()).toList();
   }
 
@@ -152,7 +142,6 @@ extension on UserRow {
       id: id,
       uid: uid,
       name: name,
-      isAdmin: isAdmin,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

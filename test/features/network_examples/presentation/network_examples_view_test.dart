@@ -7,8 +7,9 @@ import "package:mvvm_starter/features/network_examples/presentation/network_exam
 import "package:mvvm_starter/features/network_examples/presentation/network_examples_view_model.dart";
 
 void main() {
-  testWidgets("view loads and displays all four network examples",
-      (tester) async {
+  testWidgets("view loads and displays all four network examples", (
+    tester,
+  ) async {
     final viewModel = NetworkExamplesViewModel(
       repository: _FakeNetworkExamplesRepository(),
     );

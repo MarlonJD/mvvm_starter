@@ -31,14 +31,11 @@ final class NetworkExamplesState {
 /// ViewModel for the network examples screen.
 final class NetworkExamplesViewModel {
   /// Creates a network examples ViewModel.
-  NetworkExamplesViewModel({required NetworkExamplesRepository repository})
-      : _repository = repository;
+  NetworkExamplesViewModel({required this._repository});
 
   final NetworkExamplesRepository _repository;
   final ValueNotifier<UiState<NetworkExamplesState>> _state =
-      ValueNotifier<UiState<NetworkExamplesState>>(
-    const UiState.idle(),
-  );
+      ValueNotifier<UiState<NetworkExamplesState>>(const UiState.idle());
 
   /// Current view state.
   ValueListenable<UiState<NetworkExamplesState>> get state => _state;

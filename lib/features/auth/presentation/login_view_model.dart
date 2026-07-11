@@ -11,8 +11,7 @@ import "package:mvvm_starter/features/auth/domain/user.dart";
 /// ViewModel for the login screen.
 final class LoginViewModel implements RestorableViewModel {
   /// Creates a login ViewModel.
-  LoginViewModel({required AuthRepository authRepository})
-      : _authRepository = authRepository;
+  LoginViewModel({required this._authRepository});
 
   final AuthRepository _authRepository;
 
@@ -20,8 +19,9 @@ final class LoginViewModel implements RestorableViewModel {
   final AppRestorableTextEditingController nameController =
       AppRestorableTextEditingController();
 
-  final ValueNotifier<UiState<User>> _state =
-      ValueNotifier<UiState<User>>(const UiState.idle());
+  final ValueNotifier<UiState<User>> _state = ValueNotifier<UiState<User>>(
+    const UiState.idle(),
+  );
 
   /// Current login UI state.
   ValueListenable<UiState<User>> get state => _state;

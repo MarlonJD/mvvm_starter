@@ -38,8 +38,9 @@ final class _SignupRestorationHost extends StatefulWidget {
 }
 
 final class _SignupRestorationHostState extends State<_SignupRestorationHost> {
-  late final SignupViewModel viewModel =
-      SignupViewModel(authRepository: widget.repository);
+  late final SignupViewModel viewModel = SignupViewModel(
+    authRepository: widget.repository,
+  );
 
   @override
   Widget build(BuildContext context) {

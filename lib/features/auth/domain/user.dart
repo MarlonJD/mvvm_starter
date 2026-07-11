@@ -5,7 +5,6 @@ final class User {
     required this.id,
     required this.uid,
     required this.name,
-    required this.isAdmin,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -18,9 +17,6 @@ final class User {
 
   /// Login/display name.
   final String name;
-
-  /// Whether this user is the starter admin example.
-  final bool isAdmin;
 
   /// Creation timestamp.
   final DateTime createdAt;

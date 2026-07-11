@@ -38,8 +38,9 @@ final class _LoginRestorationHost extends StatefulWidget {
 }
 
 final class _LoginRestorationHostState extends State<_LoginRestorationHost> {
-  late final LoginViewModel viewModel =
-      LoginViewModel(authRepository: widget.repository);
+  late final LoginViewModel viewModel = LoginViewModel(
+    authRepository: widget.repository,
+  );
 
   @override
   Widget build(BuildContext context) {

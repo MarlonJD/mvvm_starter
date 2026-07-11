@@ -16,9 +16,7 @@ Future<void> bootstrapApp() async {
       supportedLocales: const [Locale("en", "US"), Locale("tr", "TR")],
       path: "assets/translations",
       fallbackLocale: const Locale("en", "US"),
-      child: MvvmStarterApp(
-        routerConfig: locator<RouterService>().router,
-      ),
+      child: MvvmStarterApp(routerConfig: locator<RouterService>().router),
     ),
   );
 }

@@ -17,6 +17,9 @@ enum AppErrorType {
   /// Network or remote service failed.
   network,
 
+  /// Authentication must be restored or repeated.
+  unauthorized,
+
   /// An unexpected error occurred.
   unknown,
 }
@@ -25,59 +28,39 @@ enum AppErrorType {
 @immutable
 final class AppError {
   /// Creates an application error.
-  const AppError({
-    required this.type,
-    required this.messageKey,
-    this.cause,
-  });
+  const AppError({required this.type, required this.messageKey, this.cause});
 
   /// Creates a validation error.
   const AppError.validation(String messageKey, {Object? cause})
-      : this(
-          type: AppErrorType.validation,
-          messageKey: messageKey,
-          cause: cause,
-        );
+    : this(type: AppErrorType.validation, messageKey: messageKey, cause: cause);
 
   /// Creates a not-found error.
   const AppError.notFound(String messageKey, {Object? cause})
-      : this(
-          type: AppErrorType.notFound,
-          messageKey: messageKey,
-          cause: cause,
-        );
+    : this(type: AppErrorType.notFound, messageKey: messageKey, cause: cause);
 
   /// Creates a duplicate error.
   const AppError.duplicate(String messageKey, {Object? cause})
-      : this(
-          type: AppErrorType.duplicate,
-          messageKey: messageKey,
-          cause: cause,
-        );
+    : this(type: AppErrorType.duplicate, messageKey: messageKey, cause: cause);
 
   /// Creates a database error.
   const AppError.database(String messageKey, {Object? cause})
-      : this(
-          type: AppErrorType.database,
-          messageKey: messageKey,
-          cause: cause,
-        );
+    : this(type: AppErrorType.database, messageKey: messageKey, cause: cause);
 
   /// Creates a network error.
   const AppError.network(String messageKey, {Object? cause})
-      : this(
-          type: AppErrorType.network,
-          messageKey: messageKey,
-          cause: cause,
-        );
+    : this(type: AppErrorType.network, messageKey: messageKey, cause: cause);
+
+  /// Creates an unauthorized error.
+  const AppError.unauthorized(String messageKey, {Object? cause})
+    : this(
+        type: AppErrorType.unauthorized,
+        messageKey: messageKey,
+        cause: cause,
+      );
 
   /// Creates an unknown error.
   const AppError.unknown(String messageKey, {Object? cause})
-      : this(
-          type: AppErrorType.unknown,
-          messageKey: messageKey,
-          cause: cause,
-        );
+    : this(type: AppErrorType.unknown, messageKey: messageKey, cause: cause);
 
   /// Error category.
   final AppErrorType type;

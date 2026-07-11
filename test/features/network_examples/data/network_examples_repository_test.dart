@@ -1,6 +1,7 @@
 import "package:drift/native.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:mvvm_starter/core/database/app_database.dart";
+import "package:mvvm_starter/core/errors/app_error.dart";
 import "package:mvvm_starter/features/network_examples/data/network_examples_local_data_source.dart";
 import "package:mvvm_starter/features/network_examples/data/network_examples_remote_data_sources.dart";
 import "package:mvvm_starter/features/network_examples/data/network_examples_repository.dart";
@@ -65,6 +66,14 @@ void main() {
 
     expect(result.valueOrNull, [country]);
     expect(await localDataSource.graphqlCountries(), [country]);
+  });
+
+  test("persisted REST database failure is not mapped as network", () async {
+    await database.customStatement("DROP TABLE rest_posts");
+
+    final result = await repository.fetchRestPersisted();
+
+    expect(result.errorOrNull?.type, AppErrorType.database);
   });
 }
 

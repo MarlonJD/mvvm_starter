@@ -31,10 +31,7 @@ final class _DatabaseDebugViewState extends State<DatabaseDebugView> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("debug.database.title".tr()),
-        elevation: 2,
-      ),
+      appBar: AppBar(title: Text("debug.database.title".tr()), elevation: 2),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

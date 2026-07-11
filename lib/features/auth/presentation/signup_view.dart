@@ -63,9 +63,7 @@ final class _SignupViewState extends State<SignupView> with RestorationMixin {
               TextFormField(
                 key: signupNameFieldKey,
                 controller: viewModel.nameController.value,
-                decoration: InputDecoration(
-                  labelText: "auth.name.label".tr(),
-                ),
+                decoration: InputDecoration(labelText: "auth.name.label".tr()),
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _createUser(context),
               ),
@@ -76,8 +74,9 @@ final class _SignupViewState extends State<SignupView> with RestorationMixin {
                   builder: (context, state, child) {
                     return ElevatedButton(
                       key: signupButtonKey,
-                      onPressed:
-                          state.isLoading ? null : () => _createUser(context),
+                      onPressed: state.isLoading
+                          ? null
+                          : () => _createUser(context),
                       child: state.isLoading
                           ? const SizedBox.square(
                               dimension: 18,
@@ -107,9 +106,9 @@ final class _SignupViewState extends State<SignupView> with RestorationMixin {
   }
 
   void _showSnackBar(BuildContext context, AppError error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error.messageKey.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(error.messageKey.tr())));
   }
 
   @override
