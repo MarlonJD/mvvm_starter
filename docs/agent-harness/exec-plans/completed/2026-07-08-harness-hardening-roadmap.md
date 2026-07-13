@@ -2,6 +2,14 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Status:** superseded
+
+This roadmap was superseded by
+`2026-07-11-killcritic-remediation.md`. That plan incorporated and repaired
+the pre-existing link checker, added the broader architecture/platform/test
+gates, and retained unresolved localization and release work in the technical
+debt tracker.
+
 **Goal:** Promote the bootstrap harness from documentation-only guidance into repeatable checks for architecture, docs, localization, and core app behavior.
 
 **Architecture:** Add small, focused verification scripts and tests that encode the rules already documented in `docs/agent-harness/`. Keep each check independently useful and avoid changing product behavior except where tests expose an existing harness gap.
@@ -158,5 +166,7 @@ Create a separate active execution plan for the schema move if the design doc ch
 
 ## Completion Notes
 
-Move this plan to `completed/` after all five tasks are implemented, verified,
-and their related tech debt entries are retired or narrowed.
+Superseded on 2026-07-13 and moved to `completed/`. Implemented checks and
+tests are evidenced by the replacement plan; incomplete localization inventory
+and external CI evidence remain tracked as debt rather than being claimed
+complete here.

@@ -100,6 +100,9 @@ final class _LoginViewState extends State<LoginView> with RestorationMixin {
 
   Future<void> _login(BuildContext context) async {
     final result = await viewModel.login();
+    if (!context.mounted) {
+      return;
+    }
     final error = result.errorOrNull;
     if (error != null) {
       _showSnackBar(context, error);

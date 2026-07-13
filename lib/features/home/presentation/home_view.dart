@@ -55,7 +55,17 @@ final class HomeView extends StatelessWidget {
                 TextButton(
                   key: logoutButtonKey,
                   onPressed: () async {
-                    await viewModel.logout();
+                    final result = await viewModel.logout();
+                    if (!context.mounted) {
+                      return;
+                    }
+                    final error = result.errorOrNull;
+                    if (error != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.messageKey.tr())),
+                      );
+                      return;
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("home.loggedOut".tr())),
                     );

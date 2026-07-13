@@ -15,14 +15,18 @@ Deep context lives under `docs/agent-harness/`.
 ## Repository Snapshot
 
 - App type: Flutter application.
-- Language: Dart, SDK `^3.6.1`.
-- Architecture: MVVM-style views and view models, with services behind
-  injected abstractions.
-- Routing: `go_router` through `lib/route.dart`.
-- Dependency injection: `get_it` through `lib/core/locator.dart`.
+- Language: Dart, SDK `^3.12.2`; CI uses Flutter 3.44.6 stable.
+- Architecture: MVVM Views and ViewModels with repositories, remote/local data
+  sources, and typed external-system abstractions.
+- Routing: `go_router` through `lib/app/router.dart`.
+- Dependency injection: `get_it` through the composition root in
+  `lib/app/di.dart`.
 - Localization: `easy_localization` using `assets/translations/`.
-- Persistence: SQLite through `lib/core/database_abstract.dart` and Hive
-  through `lib/core/hive_abstract.dart`.
+- Persistence: Drift/SQLite schema, migrations, and connections under
+  `lib/core/database/`.
+- Networking: typed REST/GraphQL executors under `lib/core/network/`.
+- Authentication: local demo auth plus native AppAuth OIDC tokens stored
+  behind secure storage.
 - Linting: `flutter_lints` plus repo-specific rules in
   `analysis_options.yaml`.
 
@@ -41,10 +45,12 @@ Deep context lives under `docs/agent-harness/`.
 
 - Keep UI widgets focused on rendering and user interaction.
 - Keep state transitions and user actions in view models.
-- Put domain behavior in services.
-- Access external systems through abstractions in `lib/core/`.
-- Register shared runtime dependencies in `lib/core/locator.dart`.
-- Keep routing changes centralized in `lib/route.dart`.
+- Put domain behavior and persistence policy in repositories/services.
+- Access external systems through typed data sources and abstractions.
+- Register shared runtime dependencies in `lib/app/di.dart`.
+- Keep routing changes centralized in `lib/app/router.dart` and
+  `lib/app/routes.dart`.
+- Keep Drift out of Views and ViewModels; keep GetIt calls in `lib/app/`.
 - Keep translations in `assets/translations/` when user-facing strings need
   localization.
 

@@ -2,49 +2,78 @@
 
 ## Purpose
 
-This app is a Flutter starter that demonstrates an MVVM-style structure with
-authentication screens, local persistence abstractions, routing, dependency
-injection, and localization.
+This app demonstrates a dependable Flutter MVVM foundation with local demo
+auth, session-aware routing, typed REST/GraphQL examples, explicit offline-read
+persistence, secure native OIDC, localization, and testable lifecycle behavior.
 
 ## Current User-Facing Areas
 
-- Login flow through `/login`.
-- Signup flow through `/signup`.
-- Home view through `/`.
-- Network examples through `/network-examples`.
+- Local name signup/login through `/signup` and `/login`.
+- Session-aware Home through `/`.
+- Four independent REST/GraphQL sections through `/network-examples`.
+- Native OIDC example through `/oidc-example`.
 - Debug database view through `/debug/database` in debug builds.
-- Session-aware routing based on `AuthRepository`.
-- English and Turkish localization assets.
+- English and Turkish localization.
+
+Local name auth is a demo route gate. It is not a credential, role, or
+production authorization boundary.
 
 ## Current Acceptance Criteria
 
-- App initializes Flutter bindings and localization before rendering.
-- Shared services are registered through `setupDependencies()`.
-- Drift owns local database tables for users and app sessions.
-- If no user session exists, protected navigation redirects to `/login`.
-- If a user session exists, the home route is available.
-- Home UI can display the current user and perform logout behavior.
-- Network examples can fetch and render live REST and GraphQL data.
-- Network examples demonstrate remote-only and Drift-backed persistence paths.
-- OIDC examples document token header, refresh, and logout boundaries for REST
-  and GraphQL clients.
-- Login and signup name inputs restore short-lived text through Flutter
-  restoration.
+- Bootstrap initializes Flutter bindings, localization, dependency injection,
+  local app session restoration, and secure OIDC restoration before rendering.
+- `lib/app/di.dart` composes shared dependencies and Views receive
+  constructor-injected ViewModels.
+- go_router redirects protected routes from signed-out users and reacts to
+  local session changes.
+- Drift schema v4 preserves legacy users, retains one deterministic valid
+  legacy session, enforces one current session, and scopes persisted network
+  snapshots.
+- Anonymous snapshots use `public`; validated OIDC snapshots use the
+  issuer/subject identity scope.
+- REST and GraphQL endpoints are configurable HTTPS values and share typed,
+  timeout-bounded transport behavior.
+- Remote-only network calls never read or write Drift.
+- Persisted calls replace a selected scope after remote success and provide
+  fresh/stale local fallback only after network failure.
+- All four network sections load concurrently and render success/failure
+  independently.
+- Native Android/iOS/macOS OIDC uses AppAuth authorization code + PKCE.
+- Access, refresh, and ID tokens live only in secure storage; refresh is
+  single-flight and HTTP 401 replay occurs at most once.
+- OIDC logout clears secure local state before remote end-session; remote
+  failure yields a warning without signing back in.
+- Async ViewModels cannot publish after disposal or let older work overwrite a
+  newer generation.
+- Login/signup input restoration remains ephemeral UI state only.
+
+## Supported Platforms
+
+Anonymous REST/GraphQL and Drift are intended for Android, iOS, macOS, web,
+Windows, and Linux. Interactive OIDC is supported only on Android, iOS, and
+macOS when provider values and callbacks are configured.
 
 ## Non-Goals
 
-- Hosted authentication.
-- Production OIDC provider configuration.
-- Production-grade credential storage.
-- Remote synchronization.
-- Full design system.
-- Release packaging.
+- Shipping a production issuer, client, redirect secret, or backend.
+- Treating names as credentials or deriving roles from names.
+- Certifying a provider or production authorization policy.
+- Offline writes, outbox processing, bidirectional sync, or conflict
+  resolution.
+- GraphQL subscriptions or generated GraphQL models.
+- Full design system, signing, store publication, or production-ready claims.
+
+## Release Boundary
+
+No production issuer, provider-backed real-device session, signed package,
+store release, or full external CI run has been verified. Status remains
+`release pending`.
 
 ## Open Product Questions
 
-- Should sign-up and login be example-only flows or production-bound flows?
-- Should all visible strings be localized before adding new screens?
-- Should local session behavior persist across app reinstall or only app
-  restarts?
+- Will a product fork replace the local demo gate with provider/backend auth?
+- Which data, if any, requires offline edits and a conflict policy?
+- What observability and privacy policy applies to production failures?
+- Which signed device/platform matrix is required before release?
 
-Record answered questions here or in a linked design doc.
+Record resolved questions here or in a linked design doc.

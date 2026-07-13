@@ -22,21 +22,31 @@ final class LoginViewModel implements RestorableViewModel {
   final ValueNotifier<UiState<User>> _state = ValueNotifier<UiState<User>>(
     const UiState.idle(),
   );
+  var _operationGeneration = 0;
+  var _disposed = false;
 
   /// Current login UI state.
   ValueListenable<UiState<User>> get state => _state;
 
   /// Attempts login with the current name field.
   Future<Result<User>> login() async {
+    final generation = ++_operationGeneration;
     final name = nameController.value.text.trim();
     if (name.isEmpty) {
       const error = AppError.validation("auth.nameRequired");
-      _state.value = const UiState.failure(error);
+      if (_canPublish(generation)) {
+        _state.value = const UiState.failure(error);
+      }
       return const Result.failure(error);
     }
 
-    _state.value = const UiState.loading();
+    if (_canPublish(generation)) {
+      _state.value = const UiState.loading();
+    }
     final result = await _authRepository.login(name);
+    if (!_canPublish(generation)) {
+      return result;
+    }
     final user = result.valueOrNull;
     final error = result.errorOrNull;
     if (user != null) {
@@ -54,7 +64,16 @@ final class LoginViewModel implements RestorableViewModel {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    _operationGeneration += 1;
     nameController.dispose();
     _state.dispose();
+  }
+
+  bool _canPublish(int generation) {
+    return !_disposed && generation == _operationGeneration;
   }
 }

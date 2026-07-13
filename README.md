@@ -1,47 +1,224 @@
 # MVVM Starter
 
-A Flutter starter app that demonstrates a professional MVVM architecture with
-constructor-injected ViewModels, GetIt composition, go_router navigation,
-Drift-backed SQLite persistence, typed results/errors, and Flutter restoration
-for short-lived UI state.
+A Flutter starter that demonstrates constructor-injected MVVM, go_router,
+typed REST and GraphQL transports, Drift-backed persistence, secure native OIDC,
+localized UI, and lifecycle-safe asynchronous state.
+
+Current verification status: `release pending`. Local checks are described
+below, but no production issuer, signed release, store release, or real-device
+matrix has been verified.
+
+## Requirements
+
+- Flutter 3.44.6 stable
+- Dart 3.12.2, bundled with Flutter 3.44.6
+- Platform toolchains for the targets you intend to build
+
+Verify the toolchain and resolve exactly the committed lockfile:
+
+```bash
+flutter --version
+flutter pub get --enforce-lockfile
+```
+
+## Run The Anonymous Examples
+
+The starter defaults to public HTTPS endpoints:
+
+- REST: `https://jsonplaceholder.typicode.com/posts`
+- GraphQL: `https://countries.trevorblades.com/`
+
+Run without OIDC configuration:
+
+```bash
+flutter run
+```
+
+To use other HTTPS endpoints:
+
+```bash
+flutter run \
+  --dart-define=REST_POSTS_URL=https://api.example.com/posts \
+  --dart-define=GRAPHQL_URL=https://api.example.com/graphql
+```
+
+HTTP is rejected except for localhost test endpoints. Create or log in with a
+local name to pass the starter's route gate, then open Network examples. Local
+name auth is a demo workflow, not a credential or authorization boundary.
+
+## Configure Native OIDC
+
+Interactive authorization-code login with PKCE is supported on Android, iOS,
+and macOS. Web, Windows, and Linux keep anonymous REST/GraphQL support but show
+a deterministic unsupported state for interactive OIDC.
+
+Register these exact callbacks in the provider's native/public client:
+
+- Sign-in: `mvvmstarter:/oauthredirect`
+- Post-logout: `mvvmstarter:/logout`
+
+Then run a native target with provider values:
+
+```bash
+flutter run \
+  --dart-define=OIDC_ISSUER=https://identity.example.com \
+  --dart-define=OIDC_CLIENT_ID=mvvm-starter-native \
+  --dart-define=OIDC_REDIRECT_URI=mvvmstarter:/oauthredirect \
+  --dart-define=OIDC_POST_LOGOUT_REDIRECT_URI=mvvmstarter:/logout \
+  --dart-define='OIDC_SCOPES=openid profile email offline_access'
+```
+
+The callback scheme is registered in:
+
+- Android: `android/app/build.gradle` through `appAuthRedirectScheme`
+- iOS: `ios/Runner/Info.plist`
+- macOS: `macos/Runner/Info.plist`
+
+OIDC access, refresh, and ID tokens are held only by the secure token-store
+adapter. They are never written to Drift, preferences, restoration state, logs,
+or UI. The session manager refreshes expiring tokens with single-flight
+coordination and the shared HTTP executor performs at most one forced refresh
+and one replay after a 401. Logout clears secure local state first; provider
+end-session failure can therefore produce a warning while the app remains
+locally signed out.
+
+The local name session and OIDC session are deliberately separate examples.
+Production routing and roles must be based on a trusted identity provider and
+backend policy, never on a display name.
 
 ## Architecture
 
-The main dependency flow is:
+The primary dependency paths are:
 
 ```text
+View -> ViewModel -> Repository -> RemoteDataSource -> typed REST/GraphQL transport
 View -> ViewModel -> Repository -> LocalDataSource -> Drift/SQLite
 ```
 
-- Views render UI, collect input, show feedback, and call route APIs.
-- ViewModels own screen state and user actions.
-- Repositories own domain behavior and error mapping.
-- Local data sources own database access.
-- Drift owns schema, constraints, migrations, and generated data classes.
+- Views render state, collect input, and invoke ViewModel commands.
+- ViewModels own screen state, user actions, latest-request-wins guards, and
+  lifecycle-safe publication.
+- Repositories select remote-only or persisted behavior and map errors.
+- Remote data sources validate payloads and map DTOs to domain models.
+- Local data sources own scoped Drift transactions.
+- `lib/app/di.dart` is the GetIt composition root.
+- `lib/app/router.dart` is the go_router composition point.
 
-GetIt is kept because it is small and explicit for a starter app, but it is
-limited to `lib/app/di.dart` and route/view factory composition. Feature Views
-do not call the service locator.
+Feature Views do not call GetIt or access Drift. The mechanical boundary check
+enforces these rules.
 
-Riverpod is intentionally not the main dependency. This starter teaches a
-plain MVVM shape with lightweight dependency injection instead of mixing state
-management architectures.
+## REST, GraphQL, And Offline Persistence
 
-## Project Layout
+`lib/features/network_examples/` provides four independent screen sections:
+
+- REST remote-only
+- REST remote-first with scoped offline fallback
+- GraphQL remote-only
+- GraphQL remote-first with scoped offline fallback
+
+Remote-only methods never read or write Drift. Persisted methods replace one
+scope transactionally after a successful request. On a transport/network
+failure they read only that scope and report `localFresh` for snapshots no
+older than 15 minutes or `localStale` for older snapshots. Protocol,
+authorization, and database failures remain typed and distinguishable.
+
+Choose a data boundary deliberately:
+
+| Requirement | Recommended boundary | Expected behavior |
+| --- | --- | --- |
+| Reloadable read-only content | Remote-only | No Drift access; show the remote error when unavailable. |
+| Restart-safe offline reads | Remote-first + Drift snapshot | Replace on success; fall back to scoped fresh/stale data on network failure. |
+| Disposable performance optimization | Cache-only layer | Apply an explicit TTL/ETag policy; never treat it as domain truth. |
+| Offline writes and synchronization | Dedicated sync model | Add an outbox, remote/local IDs, versions, retry policy, and conflict resolution. Not implemented here. |
+
+Anonymous snapshots use the `public` scope. After a validated OIDC login,
+snapshots use `oidc:<issuer>:<subject>`. Existing schema-v3 rows migrate into
+`public`, so upgrades preserve earlier example data without exposing one
+identity's rows to another.
+
+## Storage And Migration Compatibility
+
+Drift owns schema version 4 under `lib/core/database/`. Migrations preserve
+legacy users, retain one deterministic valid legacy session, enforce the
+singleton session at the schema level, and move pre-scope network snapshots
+into the public namespace.
+
+The native database filename remains `radlofa_app` for migration continuity.
+Do not rename it in an existing application's upgrade path: doing so creates a
+new database and strands existing user data. A new product fork may choose a
+different filename only before release, or after implementing and testing an
+explicit file migration.
+
+Flutter restoration is only for ephemeral UI state such as login/signup text.
+Tokens, users, sessions, settings, and domain records do not belong there.
+
+## Generated Files
+
+Regenerate committed Drift and web runtime outputs with:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs --build-filter=lib/core/database/app_database.g.dart
+dart run drift_dev schema dump lib/core/database/app_database.dart drift_schemas/schema_v4.json
+dart run tool/update_drift_web_assets.dart
+git diff --exit-code -- lib/core/database/app_database.g.dart drift_schemas web/drift_worker.js web/sqlite3.wasm
+```
+
+`update_drift_web_assets.dart` downloads the pinned SQLite WebAssembly asset,
+verifies its SHA-256, and rebuilds the committed Drift worker.
+
+## Verification And Builds
+
+Run the same quality gates used by CI:
+
+```bash
+dart format --output=none --set-exit-if-changed lib test integration_test tool
+dart run tool/check_agent_harness_links.dart
+dart run tool/check_mvvm_boundaries.dart
+dart run tool/check_platform_network_config.dart
+dart run tool/verify_flutter_tests.dart
+flutter analyze
+```
+
+Representative platform builds:
+
+```bash
+flutter build web --release
+flutter build apk --release
+flutter build ios --simulator --no-codesign
+flutter build macos --release
+flutter build linux --release
+flutter build windows --release
+```
+
+Each command requires its native toolchain. CI defines independent quality,
+Android, Apple, Linux, and Windows jobs; it does not sign or publish artifacts.
+
+## Renaming A Product Fork
+
+Before a first release, review all of these together:
+
+- Android application ID and Kotlin package/path
+- iOS and macOS bundle identifiers, including test targets
+- Android, iOS, and macOS display names
+- OIDC callback scheme in Dart defines, Android Gradle, both Apple plists, and
+  provider registration
+- secure-storage/keychain access groups and signing entitlements
+- database filename and migration strategy
+
+Changing an identifier or callback after release also requires provider,
+signing, upgrade, and secure-storage compatibility validation. Keep
+`radlofa_app` unchanged when preserving this starter's existing installations.
+
+## Repository Map
 
 ```text
 lib/
-|-- app/
-|   |-- app.dart
-|   |-- bootstrap.dart
-|   |-- di.dart
-|   |-- router.dart
-|   `-- routes.dart
+|-- app/                 # bootstrap, configuration, DI, routing
 |-- core/
-|   |-- database/
-|   |-- errors/
-|   |-- restoration/
-|   `-- result/
+|   |-- database/        # Drift schema, migrations, connection
+|   |-- network/         # typed HTTP/GraphQL transport
+|   |-- restoration/     # ephemeral UI restoration helpers
+|   `-- result/          # Result and UI state
 `-- features/
     |-- auth/
     |-- debug_database/
@@ -49,100 +226,6 @@ lib/
     `-- network_examples/
 ```
 
-Create new features under `lib/features/<feature>/` with `data/`, `domain/`,
-and `presentation/` folders when the feature has persistence/domain behavior.
-Keep small UI-only examples under `presentation/` until they need more layers.
-
-## Routing
-
-Routes live in `lib/app/router.dart` and route constants live in
-`lib/app/routes.dart`. The app uses go_router only; do not add
-`MaterialPageRoute` pushes for app routes.
-
-Auth redirects are based on `AuthRepository.activeUser`:
-
-- unauthenticated protected routes redirect to `/login`;
-- unauthenticated `/login` and `/signup` are allowed;
-- authenticated `/login` and `/signup` redirect to `/`.
-
-The authenticated `/network-examples` route demonstrates REST and GraphQL data
-access patterns.
-
-## Storage
-
-SQLite through Drift is the canonical store for app/domain data. The current
-schema has `users`, singleton `app_sessions`, and small persisted network
-example tables with uniqueness, foreign keys where applicable, timestamps, and
-a single active session guarantee.
-
-Drift/SQLite is not the default place for every piece of app content. Use it
-when data is durable domain state, offline-first data, relational/query-heavy
-data, or data that needs migrations and constraints. Content that is simply
-fetched from a remote API can stay behind a repository and remote data source
-until offline behavior, search, sync, or durable local state is required.
-
-## REST, GraphQL, And OIDC Examples
-
-`lib/features/network_examples/` shows four live network flows:
-
-- REST remote-only: fetches JSONPlaceholder posts and renders the response.
-- REST persisted: fetches posts, writes a Drift snapshot, then renders local
-  rows.
-- GraphQL remote-only: fetches Countries API data and renders the response.
-- GraphQL persisted: fetches countries, writes a Drift snapshot, then renders
-  local rows.
-
-The same folder includes a small OIDC boundary example. `OidcAuthorization`
-turns an `OidcTokenProvider` into REST or GraphQL headers, refreshes expired
-access tokens before use, and delegates logout to the provider adapter. A real
-OIDC login is intentionally not wired without issuer/client/redirect
-configuration and an approved secure token storage policy.
-
-Use remote-only for content that can be reloaded. Use Drift persistence when
-offline reads, app restart durability, local queries, constraints, migrations,
-or sync boundaries are real product requirements. For offline writes, add a
-sync model with dirty flags, remote ids, versioning, retry queues, and conflict
-resolution instead of treating SQLite as a simple response cache.
-
-Hive is not included by default. Reintroduce it only for a documented
-cache-only use case where Drift is not the source of truth.
-
-`shared_preferences` should be used only for tiny primitive preferences if a
-settings example is added, such as theme mode or onboardingSeen. Do not store
-users, sessions, tokens, domain records, or lists there.
-
-## Restoration
-
-Flutter restoration is used only for short-lived UI state, such as login and
-signup text fields. Restoration is not persistence and must not store users,
-sessions, tokens, settings, or domain data.
-
-Views using restoration call `registerRestorableProperties` on their ViewModel
-from `restoreState`. ViewModels expose safe listenables and controlled actions
-instead of mutable state objects.
-
-## Tests
-
-Common commands:
-
-```bash
-flutter analyze
-flutter test
-dart run build_runner build --delete-conflicting-outputs --build-filter=lib/core/database/app_database.g.dart
-```
-
-Coverage is generated only when needed:
-
-```bash
-flutter test --coverage
-```
-
-The test suite includes examples for database constraints/migration,
-repositories, ViewModels, router redirects, widget flows, localization key
-parity, network persistence boundaries, OIDC token headers, and restoration.
-
-## Agent Harness
-
-Repo-local agent instructions live in `AGENTS.md`; deeper durable context lives
-under `docs/agent-harness/`. Update harness design docs or execution plans when
-an architecture decision changes.
+Repo-local agent instructions live in `AGENTS.md`; durable architecture,
+quality, reliability, security, product, and execution context lives under
+`docs/agent-harness/`.

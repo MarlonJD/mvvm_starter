@@ -96,6 +96,9 @@ final class _SignupViewState extends State<SignupView> with RestorationMixin {
 
   Future<void> _createUser(BuildContext context) async {
     final result = await viewModel.createUser();
+    if (!context.mounted) {
+      return;
+    }
     final error = result.errorOrNull;
     if (error != null) {
       _showSnackBar(context, error);

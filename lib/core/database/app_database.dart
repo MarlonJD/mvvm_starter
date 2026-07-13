@@ -48,6 +48,9 @@ class AppSessions extends Table {
 /// REST posts persisted by the network examples feature.
 @DataClassName("RestPostRow")
 class RestPosts extends Table {
+  /// Persistence namespace for anonymous or OIDC-owned data.
+  TextColumn get scopeKey => text().named("scope_key")();
+
   /// Remote post id.
   IntColumn get id => integer()();
 
@@ -64,12 +67,15 @@ class RestPosts extends Table {
   DateTimeColumn get fetchedAt => dateTime().named("fetched_at")();
 
   @override
-  Set<Column<Object>> get primaryKey => {id};
+  Set<Column<Object>> get primaryKey => {scopeKey, id};
 }
 
 /// GraphQL countries persisted by the network examples feature.
 @DataClassName("GraphqlCountryRow")
 class GraphqlCountries extends Table {
+  /// Persistence namespace for anonymous or OIDC-owned data.
+  TextColumn get scopeKey => text().named("scope_key")();
+
   /// ISO country code.
   TextColumn get code => text()();
 
@@ -86,7 +92,7 @@ class GraphqlCountries extends Table {
   DateTimeColumn get fetchedAt => dateTime().named("fetched_at")();
 
   @override
-  Set<Column<Object>> get primaryKey => {code};
+  Set<Column<Object>> get primaryKey => {scopeKey, code};
 }
 
 /// Drift database for app/domain data.
@@ -99,7 +105,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => appMigrationStrategy(this);

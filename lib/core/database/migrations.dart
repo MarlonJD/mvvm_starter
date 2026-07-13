@@ -34,6 +34,9 @@ MigrationStrategy appMigrationStrategy(GeneratedDatabase database) {
       if (from < 3) {
         await _migrateVersionTwoToThree(database);
       }
+      if (from < 4) {
+        await _migrateVersionThreeToFour(database);
+      }
     },
     beforeOpen: (details) async {
       await database.customStatement("PRAGMA foreign_keys = ON");
@@ -41,22 +44,17 @@ MigrationStrategy appMigrationStrategy(GeneratedDatabase database) {
   );
 }
 
-Future<bool> _tableExists(
-  GeneratedDatabase database,
-  String tableName,
-) async {
-  final rows = await database.customSelect(
-    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
-    variables: [Variable.withString(tableName)],
-  ).get();
+Future<bool> _tableExists(GeneratedDatabase database, String tableName) async {
+  final rows = await database
+      .customSelect(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+        variables: [Variable.withString(tableName)],
+      )
+      .get();
   return rows.isNotEmpty;
 }
 
-String _uniqueLegacyName(
-  String rawName,
-  int id,
-  Set<String> usedNames,
-) {
+String _uniqueLegacyName(String rawName, int id, Set<String> usedNames) {
   final trimmed = rawName.trim();
   final baseName = trimmed.isEmpty ? "legacy-user-$id" : trimmed;
   var candidate = baseName;
@@ -88,7 +86,8 @@ Future<void> _migrateLegacyVersionZero(
 
   final migrationTimestamp = DateTime.now().toUtc();
   final timestampSeconds =
-      migrationTimestamp.millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+      migrationTimestamp.millisecondsSinceEpoch ~/
+      Duration.millisecondsPerSecond;
   final legacyUsers = await database
       .customSelect("SELECT id, name, uid FROM legacy_users ORDER BY id")
       .get();
@@ -103,13 +102,7 @@ Future<void> _migrateLegacyVersionZero(
 
     await database.customStatement(
       "INSERT INTO users (id, uid, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-      [
-        id,
-        uid,
-        name,
-        timestampSeconds,
-        timestampSeconds,
-      ],
+      [id, uid, name, timestampSeconds, timestampSeconds],
     );
   }
 
@@ -148,9 +141,7 @@ Future<void> _migrateLegacyVersionZero(
   await _assertNoForeignKeyViolations(database);
 }
 
-Future<void> _migrateVersionTwoToThree(
-  GeneratedDatabase database,
-) async {
+Future<void> _migrateVersionTwoToThree(GeneratedDatabase database) async {
   final sourceUserCount = await _rowCount(database, "users");
 
   await database.customStatement(
@@ -214,22 +205,95 @@ Future<void> _migrateVersionTwoToThree(
   await database.customStatement("DROP TABLE users_v2");
 }
 
+Future<void> _migrateVersionThreeToFour(GeneratedDatabase database) async {
+  final sourceRestCount = await _rowCount(database, "rest_posts");
+  final sourceGraphqlCount = await _rowCount(database, "graphql_countries");
+
+  await database.customStatement(
+    "ALTER TABLE rest_posts RENAME TO rest_posts_v3",
+  );
+  await database.customStatement(
+    "ALTER TABLE graphql_countries RENAME TO graphql_countries_v3",
+  );
+  await database.customStatement("""
+    CREATE TABLE rest_posts (
+      scope_key TEXT NOT NULL,
+      id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      fetched_at INTEGER NOT NULL,
+      PRIMARY KEY (scope_key, id)
+    )
+    """);
+  await database.customStatement("""
+    CREATE TABLE graphql_countries (
+      scope_key TEXT NOT NULL,
+      code TEXT NOT NULL,
+      name TEXT NOT NULL,
+      emoji TEXT NOT NULL,
+      capital TEXT NULL,
+      fetched_at INTEGER NOT NULL,
+      PRIMARY KEY (scope_key, code)
+    )
+    """);
+
+  await database.customStatement("""
+    INSERT INTO rest_posts (
+      scope_key, id, user_id, title, body, fetched_at
+    )
+    SELECT 'public', id, user_id, title, body, fetched_at
+    FROM rest_posts_v3
+    ORDER BY id
+    """);
+  await database.customStatement("""
+    INSERT INTO graphql_countries (
+      scope_key, code, name, emoji, capital, fetched_at
+    )
+    SELECT 'public', code, name, emoji, capital, fetched_at
+    FROM graphql_countries_v3
+    ORDER BY code
+    """);
+
+  final migratedRestCount = await _rowCount(database, "rest_posts");
+  if (migratedRestCount != sourceRestCount) {
+    throw StateError(
+      "Version-3 REST migration count mismatch: $sourceRestCount source, $migratedRestCount migrated",
+    );
+  }
+  final migratedGraphqlCount = await _rowCount(database, "graphql_countries");
+  if (migratedGraphqlCount != sourceGraphqlCount) {
+    throw StateError(
+      "Version-3 GraphQL migration count mismatch: $sourceGraphqlCount source, $migratedGraphqlCount migrated",
+    );
+  }
+
+  await database.customStatement("DROP TABLE rest_posts_v3");
+  await database.customStatement("DROP TABLE graphql_countries_v3");
+}
+
 Future<int> _rowCount(GeneratedDatabase database, String tableName) async {
   const allowedTables = {
     "users",
     "legacy_users",
+    "rest_posts",
+    "rest_posts_v3",
+    "graphql_countries",
+    "graphql_countries_v3",
   };
   if (!allowedTables.contains(tableName)) {
     throw ArgumentError.value(tableName, "tableName", "Unexpected table");
   }
-  final row = await database.customSelect("SELECT COUNT(*) AS count FROM $tableName").getSingle();
+  final row = await database
+      .customSelect("SELECT COUNT(*) AS count FROM $tableName")
+      .getSingle();
   return row.read<int>("count");
 }
 
-Future<void> _assertNoForeignKeyViolations(
-  GeneratedDatabase database,
-) async {
-  final violations = await database.customSelect("PRAGMA foreign_key_check").get();
+Future<void> _assertNoForeignKeyViolations(GeneratedDatabase database) async {
+  final violations = await database
+      .customSelect("PRAGMA foreign_key_check")
+      .get();
   if (violations.isNotEmpty) {
     throw StateError("Database migration left foreign-key violations");
   }

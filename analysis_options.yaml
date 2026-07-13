@@ -84,6 +84,6 @@ linter:
     # diagnostic_describe_all_properties: true              # To make widgets easier to debug.
     sized_box_for_whitespace: true                          # To improve code readability.
     sort_child_properties_last: true                        # To improve code readability.
-    use_build_context_synchronously: false                  # To prevent asynchronous usage of an invalid BuildContext.
+    use_build_context_synchronously: true                   # To prevent asynchronous usage of an invalid BuildContext.
     use_full_hex_values_for_flutter_colors: true            # To specify full ARGB value.
     use_key_in_widget_constructors: true                    # To improve locatability of widgets in the widget key.

@@ -1,0 +1,121 @@
+name: Flutter
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality and web release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve locked dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test integration_test tool
+      - name: Check agent-harness links
+        run: dart run tool/check_agent_harness_links.dart
+      - name: Check MVVM boundaries
+        run: dart run tool/check_mvvm_boundaries.dart
+      - name: Check platform configuration
+        run: dart run tool/check_platform_network_config.dart
+      - name: Regenerate Drift code
+        run: dart run build_runner build --delete-conflicting-outputs --build-filter=lib/core/database/app_database.g.dart
+      - name: Regenerate Drift schema
+        run: dart run drift_dev schema dump lib/core/database/app_database.dart drift_schemas/schema_v4.json
+      - name: Regenerate Drift web assets
+        run: dart run tool/update_drift_web_assets.dart
+      - name: Check generated output freshness
+        run: git diff --exit-code -- lib/core/database/app_database.g.dart drift_schemas web/drift_worker.js web/sqlite3.wasm
+      - name: Analyze
+        run: flutter analyze
+      - name: Run a nonzero test suite
+        run: dart run tool/verify_flutter_tests.dart
+      - name: Build web release
+        run: flutter build web --release
+
+  android-release:
+    name: Android release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build apk --release
+
+  apple-builds:
+    name: Apple builds
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build ios --simulator --no-codesign
+      - name: Build unsigned macOS release candidate
+        run: flutter build macos --release
+        env:
+          FLUTTER_XCODE_CODE_SIGNING_ALLOWED: "NO"
+          FLUTTER_XCODE_CODE_SIGNING_REQUIRED: "NO"
+          FLUTTER_XCODE_CODE_SIGNING_IDENTITY: ""
+
+  linux-release:
+    name: Linux release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+      - name: Install Linux desktop dependencies
+        run: sudo apt-get update && sudo apt-get install --yes clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev
+      - run: flutter config --enable-linux-desktop
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build linux --release
+
+  windows-release:
+    name: Windows release
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build windows --release

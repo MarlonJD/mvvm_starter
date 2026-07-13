@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** active
+**Status:** completed
 
 ## Progress
 
@@ -10,11 +10,11 @@
 - [x] Task 2: Preserve legacy data, enforce one session, and remove unsafe admin authority.
 - [x] Task 3: Make network and Drift startup valid on every claimed platform (`blocked` local Android artifact verification: SDK absent).
 - [x] Task 4: Add configurable typed REST and GraphQL transport.
-- [ ] Task 5: Add secure OIDC login, refresh, headers, and logout.
-- [ ] Task 6: Implement explicit offline reads and identity-scoped persistence.
-- [ ] Task 7: Harden async lifecycle and user-visible failure handling.
-- [ ] Task 8: Add mechanical architecture, test-truth, generation, and platform CI gates.
-- [ ] Task 9: Reconcile documentation, starter polish, and final evidence.
+- [x] Task 5: Add secure OIDC login, refresh, headers, and logout (iOS simulator `verified locally`; signed macOS release `blocked` by missing signing identity; unsigned compile `candidate-only`).
+- [x] Task 6: Implement explicit offline reads and identity-scoped persistence.
+- [x] Task 7: Harden async lifecycle and user-visible failure handling.
+- [x] Task 8: Add mechanical architecture, test-truth, generation, and platform CI gates.
+- [x] Task 9: Reconcile documentation, starter polish, and final evidence.
 
 **Goal:** Remove the validated data-loss, schema, platform-network, offline, OIDC, lifecycle, CI, and documentation defects so this repository is a dependable MVVM starter for REST and GraphQL applications.
 
@@ -537,7 +537,7 @@ flutter test integration_test/app_boot_smoke_test.dart -d chrome
 
 Expected: PASS and no `DriftWebOptions` startup exception.
 
-- [ ] **Step 8: Build platform artifacts** (`blocked`: web and macOS release builds passed; Android SDK is not installed)
+- [x] **Step 8: Build platform artifacts** (`blocked`: web and macOS release builds passed during Task 3; Android SDK is not installed)
 
 Run:
 
@@ -964,7 +964,7 @@ Add Apple Keychain configuration:
 
 Add it to both macOS entitlement files. Create iOS Debug/Profile and Release entitlement files with the same key and configure `CODE_SIGN_ENTITLEMENTS` for every Runner build configuration in the Xcode project. Extend platform configuration tests to assert the callback scheme, Android task-affinity removal, `android:allowBackup="false"`, and all Keychain entitlement paths. Add a README rename/configuration checklist because starter consumers must register their own scheme and redirect URIs.
 
-- [ ] **Step 10: Verify OIDC behavior** (`verified locally` tests/analyze/platform structure; `blocked` Android SDK; iOS rebuild interrupted at user request)
+- [x] **Step 10: Verify OIDC behavior** (`verified locally` tests/analyze/platform structure; `blocked` Android SDK and current-session Apple rebuilds; real provider/device `not run`)
 
 Run:
 
@@ -1008,7 +1008,7 @@ git commit -m "feat: add secure OIDC network authorization"
 - Consumes: authenticated identity when present and the typed network errors from Task 4.
 - Produces: schema version 4, `PersistenceScope`, and `PersistedResult<T>` with remote/local freshness.
 
-- [ ] **Step 1: Write failing offline and scope tests**
+- [x] **Step 1: Write failing offline and scope tests**
 
 Cover REST and GraphQL symmetrically:
 
@@ -1022,7 +1022,7 @@ Cover REST and GraphQL symmetrically:
 - an empty successful remote response replaces only its own scope;
 - one failed section does not erase or hide successful sections.
 
-- [ ] **Step 2: Run focused tests and confirm failure**
+- [x] **Step 2: Run focused tests and confirm failure**
 
 Run:
 
@@ -1034,7 +1034,7 @@ flutter test test/core/database
 
 Expected: FAIL because persisted reads require a successful network request and tables have no scope.
 
-- [ ] **Step 3: Add scope and result models**
+- [x] **Step 3: Add scope and result models**
 
 Define:
 
@@ -1067,7 +1067,7 @@ final class PersistedResult<T> {
 
 Reject blank issuer or subject before creating an OIDC scope.
 
-- [ ] **Step 4: Add scoped composite keys**
+- [x] **Step 4: Add scoped composite keys**
 
 Add `scope_key TEXT NOT NULL` to both network tables and change primary keys to:
 
@@ -1076,11 +1076,11 @@ Add `scope_key TEXT NOT NULL` to both network tables and change primary keys to:
 
 Set `schemaVersion => 4`. The version-3-to-4 migration must rebuild both tables, copy every existing row with `scope_key = "public"`, preserve `fetched_at`, validate row counts, and drop old tables only after validation.
 
-- [ ] **Step 5: Return complete local snapshots**
+- [x] **Step 5: Return complete local snapshots**
 
 Local data source reads must return rows plus their shared/latest `fetchedAt` and require a `PersistenceScope` argument. Replacement must delete and insert only the selected scope inside one transaction.
 
-- [ ] **Step 6: Implement remote-first with local fallback**
+- [x] **Step 6: Implement remote-first with local fallback**
 
 For each persisted repository operation:
 
@@ -1093,11 +1093,11 @@ For each persisted repository operation:
 
 Remote-only methods must remain free of Drift writes and reads.
 
-- [ ] **Step 7: Make screen sections independent**
+- [x] **Step 7: Make screen sections independent**
 
 Replace the all-or-nothing sequential ViewModel load with four independently renderable section states. Launch sections concurrently after publishing loading state. A REST remote-only failure must not suppress GraphQL persisted local data. Display local freshness using localized text, without exposing implementation instructions in the UI.
 
-- [ ] **Step 8: Generate code and schema snapshot**
+- [x] **Step 8: Generate code and schema snapshot**
 
 Run:
 
@@ -1108,7 +1108,7 @@ dart run drift_dev schema dump lib/core/database/app_database.dart drift_schemas
 
 Expected: both network tables have scoped composite primary keys.
 
-- [ ] **Step 9: Verify offline behavior**
+- [x] **Step 9: Verify offline behavior**
 
 Run:
 
@@ -1120,7 +1120,7 @@ flutter analyze
 
 Expected: PASS, including restart, offline fallback, stale-state, and scope-isolation tests.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit** (`not run`: the prior commit/push request applied to the then-current work-in-progress; no fresh authorization exists for later commits)
 
 ~~~bash
 git add lib/core/database lib/features/network_examples assets/translations test/core/database test/features/network_examples drift_schemas/schema_v4.json
@@ -1147,7 +1147,7 @@ git commit -m "feat: add scoped offline network persistence"
 - Consumes: `Result<T>` and independent network section state.
 - Produces: latest-request-wins ViewModels and mounted-safe Views.
 
-- [ ] **Step 1: Write failing lifecycle tests**
+- [x] **Step 1: Write failing lifecycle tests**
 
 Add deterministic completers and verify:
 
@@ -1158,7 +1158,7 @@ Add deterministic completers and verify:
 - logout success navigates only after persistence succeeds;
 - DatabaseDebug subscriptions are cancelled before notifiers are disposed.
 
-- [ ] **Step 2: Enable the context lifecycle lint**
+- [x] **Step 2: Enable the context lifecycle lint**
 
 Change:
 
@@ -1168,7 +1168,7 @@ use_build_context_synchronously: true
 
 Run `flutter analyze` and record every new finding before editing runtime code.
 
-- [ ] **Step 3: Add latest-request-wins publication guards**
+- [x] **Step 3: Add latest-request-wins publication guards**
 
 Each async ViewModel with disposable notifiers must maintain:
 
@@ -1183,15 +1183,15 @@ bool canPublish(int generation) {
 
 Increment generation at operation start and disposal. Check `canPublish` after every await and before every notifier write.
 
-- [ ] **Step 4: Add mounted checks and Result handling**
+- [x] **Step 4: Add mounted checks and Result handling**
 
 After awaiting ViewModel commands, Views must return when `!context.mounted`. Home must inspect logout failure before showing success or navigating. Login and Signup must not clear controllers or navigate after disposal.
 
-- [ ] **Step 5: Await stream cancellation internally**
+- [x] **Step 5: Await stream cancellation internally**
 
 `DatabaseDebugViewModel.close` must await both subscription cancellations, null the references, then dispose notifiers exactly once. `dispose` may call `unawaited(close())` only after setting the disposed guard synchronously.
 
-- [ ] **Step 6: Verify lifecycle behavior**
+- [x] **Step 6: Verify lifecycle behavior**
 
 Run:
 
@@ -1205,7 +1205,7 @@ flutter analyze
 
 Expected: PASS and no `use_build_context_synchronously` findings.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit** (`not run`: no fresh authorization for a later commit)
 
 ~~~bash
 git add analysis_options.yaml lib/features test/features
@@ -1231,11 +1231,11 @@ git commit -m "fix: guard async MVVM lifecycle transitions"
 - Consumes: repository source, generated files, Flutter test machine output, and platform configuration.
 - Produces: deterministic local and CI commands that fail on architecture drift or zero-test success.
 
-- [ ] **Step 1: Repair and test the existing link checker**
+- [x] **Step 1: Repair and test the existing link checker**
 
 Change its harness root from `agent-harness` to `docs/agent-harness` and add an optional `--root <path>` argument used only to select the scan root. In `test/tool/check_agent_harness_links_test.dart`, create a temporary root containing `AGENTS.md` and `docs/agent-harness/README.md`, run the checker as a subprocess, and assert exit 0 for an existing relative link. Replace that target with a missing path, rerun, and assert exit 1 plus the exact `source:line -> target does not exist` diagnostic. Preserve the user's parsing and reporting structure.
 
-- [ ] **Step 2: Add MVVM boundary checks**
+- [x] **Step 2: Add MVVM boundary checks**
 
 `tool/check_mvvm_boundaries.dart` must fail when:
 
@@ -1247,15 +1247,15 @@ Change its harness root from `agent-harness` to `docs/agent-harness` and add an 
 
 The command must print `file:line` and the violated rule.
 
-- [ ] **Step 3: Add platform configuration checks**
+- [x] **Step 3: Add platform configuration checks**
 
 `tool/check_platform_network_config.dart` must verify the same source and SHA-256 requirements as the platform test, plus OIDC callback schemes in Android/iOS/macOS.
 
-- [ ] **Step 4: Add nonzero runtime test discovery**
+- [x] **Step 4: Add nonzero runtime test discovery**
 
 `tool/verify_flutter_tests.dart` must spawn `flutter test --machine`, forward output, count non-synthetic `testStart` events, preserve the Flutter exit code, and fail when the count is zero. Print the final discovered test count.
 
-- [ ] **Step 5: Add generated-output freshness commands**
+- [x] **Step 5: Add generated-output freshness commands**
 
 CI must run:
 
@@ -1268,7 +1268,7 @@ git diff --exit-code -- lib/core/database/app_database.g.dart drift_schemas web/
 
 Expected: no diff.
 
-- [ ] **Step 6: Add CI workflow**
+- [x] **Step 6: Add CI workflow**
 
 Use read-only workflow permissions and immutable action revisions:
 
@@ -1297,7 +1297,7 @@ Create:
 
 Do not upload signing credentials or publish release artifacts.
 
-- [ ] **Step 7: Run all local mechanical gates**
+- [x] **Step 7: Run all local mechanical gates**
 
 Run:
 
@@ -1311,7 +1311,7 @@ flutter analyze
 
 Expected: PASS with a nonzero test count.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit** (`not run`: no fresh authorization for a later commit)
 
 ~~~bash
 git add tool .github/workflows/flutter.yml docs/agent-harness/QUALITY.md docs/agent-harness/RELIABILITY.md docs/agent-harness/SECURITY.md
@@ -1346,7 +1346,7 @@ git commit -m "ci: enforce Flutter architecture and platform gates"
 - Consumes: final implemented behavior and verification output.
 - Produces: accurate starter guidance with no stale architecture claims.
 
-- [ ] **Step 1: Rewrite the quick-start and support matrix**
+- [x] **Step 1: Rewrite the quick-start and support matrix**
 
 README must include:
 
@@ -1362,11 +1362,11 @@ README must include:
 - the explicit statement that `radlofa_app` remains for migration continuity;
 - `release pending` status.
 
-- [ ] **Step 2: Correct the agent map and architecture docs**
+- [x] **Step 2: Correct the agent map and architecture docs**
 
 AGENTS.md must point directly to `lib/app/router.dart`, `lib/app/di.dart`, and Drift under `lib/core/database/`. Remove every current-tense Hive/raw SQLite statement. Architecture docs must show the actual remote, auth, and offline flows and the native-only interactive OIDC support matrix.
 
-- [ ] **Step 3: Correct security and product claims**
+- [x] **Step 3: Correct security and product claims**
 
 Document:
 
@@ -1377,15 +1377,15 @@ Document:
 - offline writes and conflict resolution remain non-goals;
 - no production issuer or release has been verified.
 
-- [ ] **Step 4: Reconcile plans and debt**
+- [x] **Step 4: Reconcile plans and debt**
 
 Remove duplicate TD-001 state. Retire entries only when their mechanical command and CI gate pass. Mark the old hardening roadmap `superseded`, note its replacement by this plan, and move it to completed. Keep unresolved production-provider, real-device, observability, and release verification debt open.
 
-- [ ] **Step 5: Remove starter debris without changing compatibility data**
+- [x] **Step 5: Remove starter debris without changing compatibility data**
 
 Delete backup Podfiles and unused DateService, move MainActivity to match its package, update the generic pubspec description and iOS display name. Do not rename the native database file during this plan.
 
-- [ ] **Step 6: Run documentation and hygiene checks**
+- [x] **Step 6: Run documentation and hygiene checks**
 
 Run:
 
@@ -1397,7 +1397,7 @@ git diff --check
 
 Expected: the link checker passes; remaining matches refer only to historical context or compatibility exports and are explicitly labeled.
 
-- [ ] **Step 7: Run the final verification matrix**
+- [x] **Step 7: Run the final verification matrix** (`verified locally` except Android and signed macOS release, which are `blocked` by missing platform credentials/tooling)
 
 Run:
 
@@ -1418,7 +1418,7 @@ git diff --check
 
 Expected: all commands pass locally. Record real-provider and real-device checks as `not run` unless they actually occur.
 
-- [ ] **Step 8: Update this plan's evidence**
+- [x] **Step 8: Update this plan's evidence**
 
 Record:
 
@@ -1427,7 +1427,7 @@ Record:
 - `release pending` until release-equivalent evidence exists;
 - no `production-ready` statement.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit** (`not run`: no fresh commit or push authorization)
 
 ~~~bash
 git add README.md AGENTS.md pubspec.yaml ios macos android lib/core/date_service.dart docs/agent-harness
@@ -1461,6 +1461,34 @@ git commit -m "docs: finalize hardened MVVM starter guidance"
 
 ## Verification Log
 
+- `verified locally`: Task 9 `flutter pub get --enforce-lockfile` resolved the committed lockfile; final Dart formatting passed for 91 files after applying one mechanical formatter change.
+- `verified locally`: Task 9 documentation/hygiene checks passed: the link checker inspected 28 Markdown files, stale architecture-path matches were limited to explicitly labeled compatibility exports or historical/completed plans, workflow YAML parsed, and `git diff --check` reported no errors.
+- `verified locally`: Task 9 final `dart run tool/check_mvvm_boundaries.dart` inspected 54 runtime Dart files and the platform configuration checker passed.
+- `verified locally`: Task 9 final `dart run tool/verify_flutter_tests.dart` passed 111 non-synthetic runtime tests across 29 files with Flutter exit code 0; final `flutter analyze` reported no issues.
+- `verified locally`: Task 9 `flutter build web --release` and `flutter build ios --simulator --no-codesign` succeeded.
+- `blocked`: Task 9 `flutter build apk --release` cannot run because no Android SDK/`ANDROID_HOME` exists in the environment.
+- `blocked`: Task 9 direct signed `flutter build macos --release` cannot run because Keychain Sharing entitlements require a development signing identity and this machine has zero valid identities.
+- `candidate-only`: Task 9 macOS release compiled successfully with Flutter's documented CI build-setting bridge disabling code signing; the workflow applies those settings only to its unsigned macOS candidate and does not weaken production Xcode entitlements.
+- `not run`: GitHub Actions, Linux/Windows local builds, production-provider OIDC, real-device OIDC, signing, packaging, publication, and release checks.
+- `not run`: Task 9 commit and push; the prior authorization did not extend to these later changes.
+- `release pending`: local implementation and verification are complete, but external CI, provider/device, signing, and distribution evidence is absent. The `production-ready` label is intentionally not assigned.
+- `verified locally`: Task 8 link-checker TDD first failed because the checker ignored the supplied root and scanned a nonexistent legacy `agent-harness/` directory; `flutter test test/tool/check_agent_harness_links_test.dart` then passed its exact success/failure diagnostic test.
+- `verified locally`: Task 8 mechanical gates passed: the link checker inspected 28 Markdown files, the MVVM checker inspected 55 runtime Dart files, the platform checker validated networking, Drift web assets, callbacks, and Keychain configuration, workflow YAML parsed successfully, and `git diff --check` reported no errors.
+- `verified locally`: Task 8 regenerated Drift code, schema v4, and pinned web assets; byte-for-byte comparisons against pre-generation copies showed no generated-output drift. The CI workflow runs the plan's exact `git diff --exit-code` freshness command from a clean checkout.
+- `verified locally`: Task 8 `dart run tool/verify_flutter_tests.dart` passed 111 non-synthetic runtime tests across 29 test files, preserved Flutter exit code 0, and printed the discovered count; `flutter analyze` reported no issues afterward.
+- `candidate-only`: Task 8 added read-only GitHub Actions jobs with immutable action revisions for quality/web, Android release, Apple builds, Linux release, and Windows release.
+- `not run`: Task 8 GitHub Actions jobs; no workflow run exists for the uncommitted changes.
+- `not run`: Task 8 commit; no fresh commit authorization was provided after resuming the previously committed work-in-progress.
+- `verified locally`: Task 7 RED tests reproduced notifier-after-dispose failures in Login, Signup, OIDC, and NetworkExamples ViewModels; an older network load overwrote a newer result; refresh stayed enabled during loading; Home navigated after logout failure; and DatabaseDebug disposed notifiers before asynchronous stream cancellation completed.
+- `verified locally`: Enabling `use_build_context_synchronously` produced six findings in Login, Signup, and Home before runtime edits; after mounted guards and Result handling, `flutter analyze` reported no issues.
+- `verified locally`: Task 7 `flutter test test/features/auth/presentation` passed 16 tests, `flutter test test/features/home/presentation` passed 5 tests, `flutter test test/features/network_examples/presentation` passed 7 tests, and `flutter test test/features/debug_database/presentation` passed 2 tests.
+- `not run`: Task 7 commit; no fresh commit authorization was provided after resuming the previously committed work-in-progress.
+- `verified locally`: Task 6 TDD first failed because persistence scope/result types did not exist, schema v3 had no `scope_key`, repository methods had no scoped offline fallback, and the ViewModel exposed one all-or-nothing state.
+- `verified locally`: Task 6 generated `app_database.g.dart` and `schema_v4.json`; the snapshot declares schema version 4 with `PRIMARY KEY ("scope_key", "id")` for REST and `PRIMARY KEY ("scope_key", "code")` for GraphQL.
+- `verified locally`: Task 6 `flutter test test/core/database` passed 8 tests, `flutter test test/features/network_examples` passed 23 tests, and `flutter analyze` reported no issues on 2026-07-13.
+- `verified locally`: Task 6 restart tests closed and reopened a file-backed Drift database, then returned identity-scoped REST and GraphQL snapshots during simulated network failure with fresh/stale origin metadata.
+- `not run`: Task 6 commit; no fresh commit authorization was provided after resuming the previously committed work-in-progress.
+- `blocked`: Task 5 iOS simulator and macOS debug rebuilds could not run on 2026-07-13 because Flutter attempted to update its SDK cache outside the workspace and the managed environment rejected the required elevated write even after explicit user approval; no policy workaround was attempted.
 - `verified locally`: Task 5 tests first failed because secure OIDC storage, token/session contracts, single-flight orchestration, and presentation state did not exist; native callback tests also failed before platform configuration.
 - `verified locally`: Task 5 `flutter test test/features/auth` passed 36 tests, `flutter test test/core/network` passed 15 tests, `flutter test test/features/network_examples` passed 10 tests, `flutter test test/app/router_test.dart` passed 5 tests, `flutter test test/platform/platform_configuration_test.dart` passed 4 tests, and `flutter analyze` reported no findings before the final iOS build attempt.
 - `blocked`: Task 5 Android debug build cannot run because the configured Android SDK path does not exist.
@@ -1496,6 +1524,14 @@ git commit -m "docs: finalize hardened MVVM starter guidance"
 
 ## Decision Log
 
+- 2026-07-13: Keep macOS production entitlements/signing configuration intact; for the credential-free CI compile only, pass `CODE_SIGNING_ALLOWED=NO` and related values through Flutter's `FLUTTER_XCODE_` build-setting bridge. Treat that artifact as `candidate-only`, while signed release verification remains `blocked`/`release pending`.
+- 2026-07-13: Preserve `radlofa_app` and all migration paths, mark the older harness roadmap `superseded`, and keep provider/device, observability, first external CI run, signing, and release validation open in the debt tracker.
+- 2026-07-13: Keep CI read-only, pin third-party actions to the revisions specified by the plan, verify generated output with a clean-checkout diff in CI, and use byte-for-byte local comparisons while the intended implementation remains uncommitted.
+- 2026-07-13: Use monotonically increasing operation generations plus synchronous disposed guards in async ViewModels; each post-await publication must match the current generation, and DatabaseDebug cancellation Futures complete before notifier disposal.
+- 2026-07-13: Make `AuthRepository` subclassable only through a persistence-free `AuthRepository.fake()` test base, matching the existing network repository test seam without changing runtime DI construction.
+- 2026-07-13: Resolve the persistence scope at the start of each persisted request from the current validated OIDC issuer/subject, defaulting to `public`, so a mid-request session change cannot redirect writes or fallback reads into another namespace.
+- 2026-07-13: Keep successful empty remote responses as `DataOrigin.remote` while deleting only the selected scope; after restart an empty scope has no fallback timestamp and therefore returns the original network error.
+- 2026-07-13: Treat current-session Apple native rebuilds as `blocked` rather than bypassing the managed sandbox after it rejected Flutter SDK cache writes; continue source and focused test work that remains within the workspace.
 - 2026-07-11: The user explicitly authorized planned `tool/*.dart` edits and commits; restrict staging and commits to exact files under `tool/`, leaving every non-`tool/` change unstaged and uncommitted.
 - 2026-07-11: Use Flutter's documented `flutter drive` web integration path with a version-matched temporary ChromeDriver because the installed Flutter master command rejects `flutter test` integration targets on web before launch.
 - 2026-07-11: Preserve `tool/` unchanged despite Task 3 and Task 8 plan steps that require edits there; web assets may be generated manually for runtime progress, but the reproducibility/CI gate remains incomplete until the ownership conflict is resolved.
@@ -1515,4 +1551,18 @@ git commit -m "docs: finalize hardened MVVM starter guidance"
 
 ## Completion Notes
 
-Keep this plan in `active/` until every acceptance criterion has evidence. On completion, record exact command results, move this file to `exec-plans/completed/`, and keep unresolved provider, device, and release work in the technical debt tracker.
+Completed locally on 2026-07-13. Tasks 1-9 implemented migration-safe Drift
+schema/session hardening, platform networking and web assets, typed
+REST/GraphQL transports, secure native OIDC, identity-scoped offline reads,
+async lifecycle guards, mechanical/CI gates, starter cleanup, and reconciled
+documentation.
+
+The final suite passed 111 runtime tests and static analysis. Web and iOS
+simulator builds passed. Android is blocked by the absent SDK; signed macOS is
+blocked by the absent development identity, while an unsigned macOS CI
+candidate compiled. External workflow, production provider, real-device,
+signing, packaging, and release evidence remain open in the technical debt
+tracker, so status is `release pending` and not `production-ready`.
+
+No Task 6-9 commit or push was made because no fresh authorization was given.
+This completed plan is stored under `exec-plans/completed/`.

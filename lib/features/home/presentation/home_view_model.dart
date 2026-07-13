@@ -15,5 +15,4 @@ final class HomeViewModel {
 
   /// Logs out the active user.
   Future<Result<void>> logout() => _authRepository.logout();
-
 }

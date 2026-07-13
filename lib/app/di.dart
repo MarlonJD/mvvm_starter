@@ -26,6 +26,7 @@ import "package:mvvm_starter/features/home/presentation/home_view_model.dart";
 import "package:mvvm_starter/features/network_examples/data/network_examples_local_data_source.dart";
 import "package:mvvm_starter/features/network_examples/data/network_examples_remote_data_sources.dart";
 import "package:mvvm_starter/features/network_examples/data/network_examples_repository.dart";
+import "package:mvvm_starter/features/network_examples/domain/persistence_scope.dart";
 import "package:mvvm_starter/features/network_examples/presentation/network_examples_view.dart";
 import "package:mvvm_starter/features/network_examples/presentation/network_examples_view_model.dart";
 
@@ -116,6 +117,16 @@ void setupDependencies({AppDatabase? database}) {
         restRemoteDataSource: locator<RestPostsRemoteDataSource>(),
         graphqlRemoteDataSource: locator<GraphqlCountriesRemoteDataSource>(),
         localDataSource: locator<NetworkExamplesLocalDataSource>(),
+        persistenceScope: () {
+          final tokenSet = locator<OidcSessionManager>().tokenSet.value;
+          if (tokenSet == null) {
+            return const PersistenceScope.public();
+          }
+          return PersistenceScope.oidc(
+            issuer: tokenSet.issuer,
+            subject: tokenSet.subject,
+          );
+        },
       ),
     )
     ..registerFactory<NetworkExamplesViewModel>(

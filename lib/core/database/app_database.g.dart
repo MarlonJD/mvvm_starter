@@ -666,6 +666,17 @@ class $RestPostsTable extends RestPosts
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $RestPostsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _scopeKeyMeta = const VerificationMeta(
+    'scopeKey',
+  );
+  @override
+  late final GeneratedColumn<String> scopeKey = GeneratedColumn<String>(
+    'scope_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -673,7 +684,7 @@ class $RestPostsTable extends RestPosts
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
@@ -714,7 +725,14 @@ class $RestPostsTable extends RestPosts
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, userId, title, body, fetchedAt];
+  List<GeneratedColumn> get $columns => [
+    scopeKey,
+    id,
+    userId,
+    title,
+    body,
+    fetchedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -727,8 +745,18 @@ class $RestPostsTable extends RestPosts
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('scope_key')) {
+      context.handle(
+        _scopeKeyMeta,
+        scopeKey.isAcceptableOrUnknown(data['scope_key']!, _scopeKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeKeyMeta);
+    }
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('user_id')) {
       context.handle(
@@ -766,11 +794,15 @@ class $RestPostsTable extends RestPosts
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {scopeKey, id};
   @override
   RestPostRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RestPostRow(
+      scopeKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_key'],
+      )!,
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -801,6 +833,9 @@ class $RestPostsTable extends RestPosts
 }
 
 class RestPostRow extends DataClass implements Insertable<RestPostRow> {
+  /// Persistence namespace for anonymous or OIDC-owned data.
+  final String scopeKey;
+
   /// Remote post id.
   final int id;
 
@@ -816,6 +851,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   /// Last network fetch timestamp.
   final DateTime fetchedAt;
   const RestPostRow({
+    required this.scopeKey,
     required this.id,
     required this.userId,
     required this.title,
@@ -825,6 +861,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['scope_key'] = Variable<String>(scopeKey);
     map['id'] = Variable<int>(id);
     map['user_id'] = Variable<int>(userId);
     map['title'] = Variable<String>(title);
@@ -835,6 +872,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
 
   RestPostsCompanion toCompanion(bool nullToAbsent) {
     return RestPostsCompanion(
+      scopeKey: Value(scopeKey),
       id: Value(id),
       userId: Value(userId),
       title: Value(title),
@@ -849,6 +887,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RestPostRow(
+      scopeKey: serializer.fromJson<String>(json['scopeKey']),
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<int>(json['userId']),
       title: serializer.fromJson<String>(json['title']),
@@ -860,6 +899,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'scopeKey': serializer.toJson<String>(scopeKey),
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<int>(userId),
       'title': serializer.toJson<String>(title),
@@ -869,12 +909,14 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   }
 
   RestPostRow copyWith({
+    String? scopeKey,
     int? id,
     int? userId,
     String? title,
     String? body,
     DateTime? fetchedAt,
   }) => RestPostRow(
+    scopeKey: scopeKey ?? this.scopeKey,
     id: id ?? this.id,
     userId: userId ?? this.userId,
     title: title ?? this.title,
@@ -883,6 +925,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   );
   RestPostRow copyWithCompanion(RestPostsCompanion data) {
     return RestPostRow(
+      scopeKey: data.scopeKey.present ? data.scopeKey.value : this.scopeKey,
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
       title: data.title.present ? data.title.value : this.title,
@@ -894,6 +937,7 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   @override
   String toString() {
     return (StringBuffer('RestPostRow(')
+          ..write('scopeKey: $scopeKey, ')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('title: $title, ')
@@ -904,11 +948,12 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, title, body, fetchedAt);
+  int get hashCode => Object.hash(scopeKey, id, userId, title, body, fetchedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RestPostRow &&
+          other.scopeKey == this.scopeKey &&
           other.id == this.id &&
           other.userId == this.userId &&
           other.title == this.title &&
@@ -917,63 +962,82 @@ class RestPostRow extends DataClass implements Insertable<RestPostRow> {
 }
 
 class RestPostsCompanion extends UpdateCompanion<RestPostRow> {
+  final Value<String> scopeKey;
   final Value<int> id;
   final Value<int> userId;
   final Value<String> title;
   final Value<String> body;
   final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
   const RestPostsCompanion({
+    this.scopeKey = const Value.absent(),
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.title = const Value.absent(),
     this.body = const Value.absent(),
     this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   RestPostsCompanion.insert({
-    this.id = const Value.absent(),
+    required String scopeKey,
+    required int id,
     required int userId,
     required String title,
     required String body,
     required DateTime fetchedAt,
-  }) : userId = Value(userId),
+    this.rowid = const Value.absent(),
+  }) : scopeKey = Value(scopeKey),
+       id = Value(id),
+       userId = Value(userId),
        title = Value(title),
        body = Value(body),
        fetchedAt = Value(fetchedAt);
   static Insertable<RestPostRow> custom({
+    Expression<String>? scopeKey,
     Expression<int>? id,
     Expression<int>? userId,
     Expression<String>? title,
     Expression<String>? body,
     Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (scopeKey != null) 'scope_key': scopeKey,
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (title != null) 'title': title,
       if (body != null) 'body': body,
       if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   RestPostsCompanion copyWith({
+    Value<String>? scopeKey,
     Value<int>? id,
     Value<int>? userId,
     Value<String>? title,
     Value<String>? body,
     Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
   }) {
     return RestPostsCompanion(
+      scopeKey: scopeKey ?? this.scopeKey,
       id: id ?? this.id,
       userId: userId ?? this.userId,
       title: title ?? this.title,
       body: body ?? this.body,
       fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (scopeKey.present) {
+      map['scope_key'] = Variable<String>(scopeKey.value);
+    }
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
@@ -989,17 +1053,22 @@ class RestPostsCompanion extends UpdateCompanion<RestPostRow> {
     if (fetchedAt.present) {
       map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('RestPostsCompanion(')
+          ..write('scopeKey: $scopeKey, ')
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('title: $title, ')
           ..write('body: $body, ')
-          ..write('fetchedAt: $fetchedAt')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1011,6 +1080,17 @@ class $GraphqlCountriesTable extends GraphqlCountries
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $GraphqlCountriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _scopeKeyMeta = const VerificationMeta(
+    'scopeKey',
+  );
+  @override
+  late final GeneratedColumn<String> scopeKey = GeneratedColumn<String>(
+    'scope_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _codeMeta = const VerificationMeta('code');
   @override
   late final GeneratedColumn<String> code = GeneratedColumn<String>(
@@ -1061,7 +1141,14 @@ class $GraphqlCountriesTable extends GraphqlCountries
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [code, name, emoji, capital, fetchedAt];
+  List<GeneratedColumn> get $columns => [
+    scopeKey,
+    code,
+    name,
+    emoji,
+    capital,
+    fetchedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1074,6 +1161,14 @@ class $GraphqlCountriesTable extends GraphqlCountries
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('scope_key')) {
+      context.handle(
+        _scopeKeyMeta,
+        scopeKey.isAcceptableOrUnknown(data['scope_key']!, _scopeKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeKeyMeta);
+    }
     if (data.containsKey('code')) {
       context.handle(
         _codeMeta,
@@ -1116,11 +1211,15 @@ class $GraphqlCountriesTable extends GraphqlCountries
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {code};
+  Set<GeneratedColumn> get $primaryKey => {scopeKey, code};
   @override
   GraphqlCountryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return GraphqlCountryRow(
+      scopeKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_key'],
+      )!,
       code: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}code'],
@@ -1152,6 +1251,9 @@ class $GraphqlCountriesTable extends GraphqlCountries
 
 class GraphqlCountryRow extends DataClass
     implements Insertable<GraphqlCountryRow> {
+  /// Persistence namespace for anonymous or OIDC-owned data.
+  final String scopeKey;
+
   /// ISO country code.
   final String code;
 
@@ -1167,6 +1269,7 @@ class GraphqlCountryRow extends DataClass
   /// Last network fetch timestamp.
   final DateTime fetchedAt;
   const GraphqlCountryRow({
+    required this.scopeKey,
     required this.code,
     required this.name,
     required this.emoji,
@@ -1176,6 +1279,7 @@ class GraphqlCountryRow extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['scope_key'] = Variable<String>(scopeKey);
     map['code'] = Variable<String>(code);
     map['name'] = Variable<String>(name);
     map['emoji'] = Variable<String>(emoji);
@@ -1188,6 +1292,7 @@ class GraphqlCountryRow extends DataClass
 
   GraphqlCountriesCompanion toCompanion(bool nullToAbsent) {
     return GraphqlCountriesCompanion(
+      scopeKey: Value(scopeKey),
       code: Value(code),
       name: Value(name),
       emoji: Value(emoji),
@@ -1204,6 +1309,7 @@ class GraphqlCountryRow extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GraphqlCountryRow(
+      scopeKey: serializer.fromJson<String>(json['scopeKey']),
       code: serializer.fromJson<String>(json['code']),
       name: serializer.fromJson<String>(json['name']),
       emoji: serializer.fromJson<String>(json['emoji']),
@@ -1215,6 +1321,7 @@ class GraphqlCountryRow extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'scopeKey': serializer.toJson<String>(scopeKey),
       'code': serializer.toJson<String>(code),
       'name': serializer.toJson<String>(name),
       'emoji': serializer.toJson<String>(emoji),
@@ -1224,12 +1331,14 @@ class GraphqlCountryRow extends DataClass
   }
 
   GraphqlCountryRow copyWith({
+    String? scopeKey,
     String? code,
     String? name,
     String? emoji,
     Value<String?> capital = const Value.absent(),
     DateTime? fetchedAt,
   }) => GraphqlCountryRow(
+    scopeKey: scopeKey ?? this.scopeKey,
     code: code ?? this.code,
     name: name ?? this.name,
     emoji: emoji ?? this.emoji,
@@ -1238,6 +1347,7 @@ class GraphqlCountryRow extends DataClass
   );
   GraphqlCountryRow copyWithCompanion(GraphqlCountriesCompanion data) {
     return GraphqlCountryRow(
+      scopeKey: data.scopeKey.present ? data.scopeKey.value : this.scopeKey,
       code: data.code.present ? data.code.value : this.code,
       name: data.name.present ? data.name.value : this.name,
       emoji: data.emoji.present ? data.emoji.value : this.emoji,
@@ -1249,6 +1359,7 @@ class GraphqlCountryRow extends DataClass
   @override
   String toString() {
     return (StringBuffer('GraphqlCountryRow(')
+          ..write('scopeKey: $scopeKey, ')
           ..write('code: $code, ')
           ..write('name: $name, ')
           ..write('emoji: $emoji, ')
@@ -1259,11 +1370,13 @@ class GraphqlCountryRow extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(code, name, emoji, capital, fetchedAt);
+  int get hashCode =>
+      Object.hash(scopeKey, code, name, emoji, capital, fetchedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is GraphqlCountryRow &&
+          other.scopeKey == this.scopeKey &&
           other.code == this.code &&
           other.name == this.name &&
           other.emoji == this.emoji &&
@@ -1272,6 +1385,7 @@ class GraphqlCountryRow extends DataClass
 }
 
 class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
+  final Value<String> scopeKey;
   final Value<String> code;
   final Value<String> name;
   final Value<String> emoji;
@@ -1279,6 +1393,7 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
   final Value<DateTime> fetchedAt;
   final Value<int> rowid;
   const GraphqlCountriesCompanion({
+    this.scopeKey = const Value.absent(),
     this.code = const Value.absent(),
     this.name = const Value.absent(),
     this.emoji = const Value.absent(),
@@ -1287,17 +1402,20 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
     this.rowid = const Value.absent(),
   });
   GraphqlCountriesCompanion.insert({
+    required String scopeKey,
     required String code,
     required String name,
     required String emoji,
     this.capital = const Value.absent(),
     required DateTime fetchedAt,
     this.rowid = const Value.absent(),
-  }) : code = Value(code),
+  }) : scopeKey = Value(scopeKey),
+       code = Value(code),
        name = Value(name),
        emoji = Value(emoji),
        fetchedAt = Value(fetchedAt);
   static Insertable<GraphqlCountryRow> custom({
+    Expression<String>? scopeKey,
     Expression<String>? code,
     Expression<String>? name,
     Expression<String>? emoji,
@@ -1306,6 +1424,7 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (scopeKey != null) 'scope_key': scopeKey,
       if (code != null) 'code': code,
       if (name != null) 'name': name,
       if (emoji != null) 'emoji': emoji,
@@ -1316,6 +1435,7 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
   }
 
   GraphqlCountriesCompanion copyWith({
+    Value<String>? scopeKey,
     Value<String>? code,
     Value<String>? name,
     Value<String>? emoji,
@@ -1324,6 +1444,7 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
     Value<int>? rowid,
   }) {
     return GraphqlCountriesCompanion(
+      scopeKey: scopeKey ?? this.scopeKey,
       code: code ?? this.code,
       name: name ?? this.name,
       emoji: emoji ?? this.emoji,
@@ -1336,6 +1457,9 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (scopeKey.present) {
+      map['scope_key'] = Variable<String>(scopeKey.value);
+    }
     if (code.present) {
       map['code'] = Variable<String>(code.value);
     }
@@ -1360,6 +1484,7 @@ class GraphqlCountriesCompanion extends UpdateCompanion<GraphqlCountryRow> {
   @override
   String toString() {
     return (StringBuffer('GraphqlCountriesCompanion(')
+          ..write('scopeKey: $scopeKey, ')
           ..write('code: $code, ')
           ..write('name: $name, ')
           ..write('emoji: $emoji, ')
@@ -1984,19 +2109,23 @@ typedef $$AppSessionsTableProcessedTableManager =
     >;
 typedef $$RestPostsTableCreateCompanionBuilder =
     RestPostsCompanion Function({
-      Value<int> id,
+      required String scopeKey,
+      required int id,
       required int userId,
       required String title,
       required String body,
       required DateTime fetchedAt,
+      Value<int> rowid,
     });
 typedef $$RestPostsTableUpdateCompanionBuilder =
     RestPostsCompanion Function({
+      Value<String> scopeKey,
       Value<int> id,
       Value<int> userId,
       Value<String> title,
       Value<String> body,
       Value<DateTime> fetchedAt,
+      Value<int> rowid,
     });
 
 class $$RestPostsTableFilterComposer
@@ -2008,6 +2137,11 @@ class $$RestPostsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<String> get scopeKey => $composableBuilder(
+    column: $table.scopeKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
@@ -2043,6 +2177,11 @@ class $$RestPostsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<String> get scopeKey => $composableBuilder(
+    column: $table.scopeKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
@@ -2078,6 +2217,9 @@ class $$RestPostsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<String> get scopeKey =>
+      $composableBuilder(column: $table.scopeKey, builder: (column) => column);
+
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
@@ -2125,31 +2267,39 @@ class $$RestPostsTableTableManager
               $$RestPostsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
+                Value<String> scopeKey = const Value.absent(),
                 Value<int> id = const Value.absent(),
                 Value<int> userId = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> body = const Value.absent(),
                 Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => RestPostsCompanion(
+                scopeKey: scopeKey,
                 id: id,
                 userId: userId,
                 title: title,
                 body: body,
                 fetchedAt: fetchedAt,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                required String scopeKey,
+                required int id,
                 required int userId,
                 required String title,
                 required String body,
                 required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
               }) => RestPostsCompanion.insert(
+                scopeKey: scopeKey,
                 id: id,
                 userId: userId,
                 title: title,
                 body: body,
                 fetchedAt: fetchedAt,
+                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -2178,6 +2328,7 @@ typedef $$RestPostsTableProcessedTableManager =
     >;
 typedef $$GraphqlCountriesTableCreateCompanionBuilder =
     GraphqlCountriesCompanion Function({
+      required String scopeKey,
       required String code,
       required String name,
       required String emoji,
@@ -2187,6 +2338,7 @@ typedef $$GraphqlCountriesTableCreateCompanionBuilder =
     });
 typedef $$GraphqlCountriesTableUpdateCompanionBuilder =
     GraphqlCountriesCompanion Function({
+      Value<String> scopeKey,
       Value<String> code,
       Value<String> name,
       Value<String> emoji,
@@ -2204,6 +2356,11 @@ class $$GraphqlCountriesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<String> get scopeKey => $composableBuilder(
+    column: $table.scopeKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get code => $composableBuilder(
     column: $table.code,
     builder: (column) => ColumnFilters(column),
@@ -2239,6 +2396,11 @@ class $$GraphqlCountriesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<String> get scopeKey => $composableBuilder(
+    column: $table.scopeKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get code => $composableBuilder(
     column: $table.code,
     builder: (column) => ColumnOrderings(column),
@@ -2274,6 +2436,9 @@ class $$GraphqlCountriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<String> get scopeKey =>
+      $composableBuilder(column: $table.scopeKey, builder: (column) => column);
+
   GeneratedColumn<String> get code =>
       $composableBuilder(column: $table.code, builder: (column) => column);
 
@@ -2327,6 +2492,7 @@ class $$GraphqlCountriesTableTableManager
               $$GraphqlCountriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
+                Value<String> scopeKey = const Value.absent(),
                 Value<String> code = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> emoji = const Value.absent(),
@@ -2334,6 +2500,7 @@ class $$GraphqlCountriesTableTableManager
                 Value<DateTime> fetchedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GraphqlCountriesCompanion(
+                scopeKey: scopeKey,
                 code: code,
                 name: name,
                 emoji: emoji,
@@ -2343,6 +2510,7 @@ class $$GraphqlCountriesTableTableManager
               ),
           createCompanionCallback:
               ({
+                required String scopeKey,
                 required String code,
                 required String name,
                 required String emoji,
@@ -2350,6 +2518,7 @@ class $$GraphqlCountriesTableTableManager
                 required DateTime fetchedAt,
                 Value<int> rowid = const Value.absent(),
               }) => GraphqlCountriesCompanion.insert(
+                scopeKey: scopeKey,
                 code: code,
                 name: name,
                 emoji: emoji,

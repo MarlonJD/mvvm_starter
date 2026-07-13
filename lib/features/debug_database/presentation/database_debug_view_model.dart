@@ -22,6 +22,8 @@ final class DatabaseDebugViewModel {
   StreamSubscription<List<int>>? _sessionsSubscription;
   bool _disposed = false;
   bool _notifiersDisposed = false;
+  var _operationGeneration = 0;
+  Future<void>? _closeInFlight;
 
   /// Users for display.
   ValueListenable<List<User>> get users => _users;
@@ -31,9 +33,16 @@ final class DatabaseDebugViewModel {
 
   /// Starts database watches.
   Future<void> init() async {
-    final users = await _authRepository.users();
-    final sessions = await _authRepository.sessionUserIds();
     if (_disposed) {
+      return;
+    }
+    final generation = ++_operationGeneration;
+    final users = await _authRepository.users();
+    if (!_canPublish(generation)) {
+      return;
+    }
+    final sessions = await _authRepository.sessionUserIds();
+    if (!_canPublish(generation)) {
       return;
     }
 
@@ -43,7 +52,7 @@ final class DatabaseDebugViewModel {
       return;
     }
     _usersSubscription = _authRepository.watchUsers().listen((users) {
-      if (_disposed) {
+      if (!_canPublish(generation)) {
         return;
       }
       _users.value = users;
@@ -51,7 +60,7 @@ final class DatabaseDebugViewModel {
     _sessionsSubscription = _authRepository.watchSessionUserIds().listen((
       sessions,
     ) {
-      if (_disposed) {
+      if (!_canPublish(generation)) {
         return;
       }
       _sessions.value = sessions;
@@ -70,16 +79,27 @@ final class DatabaseDebugViewModel {
 
   /// Releases resources and waits for stream cancellation.
   Future<void> close() {
-    _disposed = true;
-    unawaited(_usersSubscription?.cancel());
-    unawaited(_sessionsSubscription?.cancel());
+    if (!_disposed) {
+      _disposed = true;
+      _operationGeneration += 1;
+    }
+    return _closeInFlight ??= _performClose();
+  }
+
+  Future<void> _performClose() async {
+    final usersCancellation = _usersSubscription?.cancel();
+    final sessionsCancellation = _sessionsSubscription?.cancel();
     _usersSubscription = null;
     _sessionsSubscription = null;
+    await Future.wait([?usersCancellation, ?sessionsCancellation]);
     if (!_notifiersDisposed) {
       _notifiersDisposed = true;
       _users.dispose();
       _sessions.dispose();
     }
-    return Future<void>.value();
+  }
+
+  bool _canPublish(int generation) {
+    return !_disposed && generation == _operationGeneration;
   }
 }

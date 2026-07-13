@@ -2,8 +2,12 @@ import "dart:io";
 
 import "package:path/path.dart" as path;
 
-void main() {
-  final root = Directory.current.absolute.path;
+void main(List<String> arguments) {
+  final root = _scanRoot(arguments);
+  if (root == null) {
+    exitCode = 64;
+    return;
+  }
   final files = _markdownFiles(root);
   final brokenLinks = <_BrokenLink>[];
   var checkedLinks = 0;
@@ -69,6 +73,19 @@ void main() {
   );
 }
 
+String? _scanRoot(List<String> arguments) {
+  if (arguments.isEmpty) {
+    return Directory.current.absolute.path;
+  }
+  if (arguments.length == 2 && arguments.first == "--root") {
+    return Directory(arguments.last).absolute.path;
+  }
+  stderr.writeln(
+    "Usage: dart run tool/check_agent_harness_links.dart [--root <path>]",
+  );
+  return null;
+}
+
 final _markdownLinkPattern = RegExp(r"!?\[[^\]\n]*\]\(([^)\n]+)\)");
 
 List<File> _markdownFiles(String root) {
@@ -76,14 +93,13 @@ List<File> _markdownFiles(String root) {
       .map((name) => File(path.join(root, name)))
       .where((file) => file.existsSync());
 
-  final harnessFiles = Directory(path.join(root, "agent-harness"))
+  final harnessFiles = Directory(path.join(root, "docs", "agent-harness"))
       .listSync(recursive: true)
       .whereType<File>()
       .where((file) => path.extension(file.path) == ".md");
 
-  final files = [...rootFiles, ...harnessFiles]..sort(
-      (left, right) => left.path.compareTo(right.path),
-    );
+  final files = [...rootFiles, ...harnessFiles]
+    ..sort((left, right) => left.path.compareTo(right.path));
   return files;
 }
 

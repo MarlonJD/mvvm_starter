@@ -3,157 +3,165 @@
 ## Decision
 
 Keep REST, GraphQL, OIDC, and local persistence behind the MVVM repository
-boundary. A feature can fetch remote data without local persistence, or it can
-add a Drift local data source when the product requires offline access,
-durability, relational queries, constraints, migrations, or sync.
-
-The starter includes `network_examples` to make the split visible:
-
-- REST remote-only: fetch JSONPlaceholder posts and render them directly.
-- REST persisted: fetch posts, replace a Drift snapshot, then render local rows.
-- GraphQL remote-only: fetch Countries API data and render it directly.
-- GraphQL persisted: fetch countries, replace a Drift snapshot, then render
-  local rows.
+boundary. Use the shared typed HTTP executor for both protocols, keep payload
+mapping in remote data sources, and add Drift only when offline/restart
+behavior is an explicit product contract.
 
 ## Data Access Choices
 
-Use remote-only when:
+| Requirement | Boundary | Contract |
+| --- | --- | --- |
+| Reloadable read-only content | Remote-only | No Drift access; remote failure is visible. |
+| Short-lived process state | ViewModel/memory | Lost on restart and safe to refetch. |
+| Disposable performance cache | Cache-only adapter | Explicit TTL/ETag invalidation; not domain truth. |
+| Restart-safe offline reads | Remote-first repository + Drift snapshot | Replace on success; scoped fresh/stale fallback on network failure. |
+| Offline edits | Dedicated sync architecture | Outbox, IDs, versions, retries, and conflict policy. Not implemented. |
 
-- The content is read-only or easy to reload.
-- Offline behavior is not a product requirement.
-- The screen does not need local search, filtering, joins, or history.
-- Losing the data after app restart is acceptable.
+Do not turn every API response into a database table. Do not present snapshot
+persistence as offline-write support.
 
-Use in-memory state when:
-
-- Data only needs to survive the current screen or app process.
-- The source of truth remains the remote API.
-- A refresh can safely discard the old value.
-
-Use a cache-only layer when:
-
-- You need short-lived performance caching, not domain truth.
-- Stale data can be invalidated by TTL, ETag, or server cache headers.
-- The cache is clearly documented as disposable.
-
-Use Drift local persistence when:
-
-- The user expects offline reads or writes.
-- The app must survive restart without refetching.
-- Records need constraints, relationships, migrations, or local queries.
-- A sync boundary is needed between local changes and remote APIs.
-
-Use a sync model when:
-
-- Users can edit data offline.
-- Conflicts are possible.
-- Records need remote ids, local dirty flags, version fields, retry queues, and
-  conflict resolution policy.
-
-## REST Shape
-
-Remote-only:
+## Typed REST Flow
 
 ```text
-View -> ViewModel -> Repository -> RestRemoteDataSource -> REST API
+View
+  -> NetworkExamplesViewModel
+  -> NetworkExamplesRepository
+  -> RestPostsRemoteDataSource
+  -> HttpRequestExecutor
+  -> configured REST endpoint
 ```
 
-Persisted snapshot:
+`REST_POSTS_URL` selects the HTTPS endpoint. The REST source adds its query
+parameters, the shared executor applies a 15-second timeout and optional bearer
+header, and DTO parsing rejects malformed envelopes/fields with typed
+`NetworkException` categories.
+
+Remote-only returns mapped domain posts without touching Drift. The persisted
+method replaces the selected snapshot after success and returns
+`DataOrigin.remote`.
+
+## Typed GraphQL Flow
 
 ```text
-View -> ViewModel -> Repository
-  -> RestRemoteDataSource -> REST API
-  -> LocalDataSource -> Drift/SQLite
+View
+  -> NetworkExamplesViewModel
+  -> NetworkExamplesRepository
+  -> GraphqlCountriesRemoteDataSource
+  -> GraphqlRequestExecutor
+  -> HttpRequestExecutor
+  -> configured GraphQL endpoint
 ```
 
-The persisted example intentionally returns rows read back from Drift after the
-network fetch. That keeps the local boundary obvious and testable.
+`GRAPHQL_URL` selects the HTTPS endpoint. The executor sends a document,
+variables, and optional operation name in a JSON request. It validates the
+GraphQL envelope, rejects nonempty `errors`, requires a data object, and keeps
+response maps out of Views.
 
-## GraphQL Shape
+Remote-only does not touch Drift. Persisted GraphQL uses the same snapshot
+policy as REST.
 
-Remote-only:
+## Shared Transport Contract
+
+`HttpRequestExecutor`:
+
+- accepts HTTPS endpoints, with HTTP limited to localhost tests;
+- applies a timeout to each attempt;
+- maps timeout, transport, HTTP status, unauthorized, payload, and GraphQL
+  failures;
+- injects the current OIDC bearer header when one exists;
+- on 401, requests one forced refresh and replays once;
+- never loops on repeated 401 responses.
+
+Local read/write failures map to database errors rather than network errors.
+
+## Offline Read And Identity Scope
+
+Persisted REST and GraphQL reads are remote-first:
+
+1. Capture the current persistence scope at request start.
+2. Fetch remote data.
+3. On success, replace only that scope in one Drift transaction.
+4. On `NetworkException`, read only the captured scope.
+5. Return `localFresh` when age is at most 15 minutes or `localStale` when
+   older.
+6. If the scope is empty, return the original remote error.
+
+Anonymous requests use `public`. A validated OIDC token set uses
+`oidc:<issuer>:<subject>`. Schema-v3 snapshots migrate to `public`, preserving
+existing data while preventing private cross-identity fallback.
+
+Successful empty remote responses clear only the selected scope. They remain a
+successful remote result and do not leave an invented fallback timestamp.
+
+## Native OIDC Flow
 
 ```text
-View -> ViewModel -> Repository -> GraphqlRemoteDataSource -> GraphQL API
+OidcExampleView
+  -> OidcExampleViewModel
+  -> OidcSessionManager
+  -> AppAuthOidcClient -> OIDC provider
+  -> FlutterSecureOidcTokenStore -> platform secure storage
 ```
 
-Persisted snapshot:
+The provider-independent configuration comes from:
 
-```text
-View -> ViewModel -> Repository
-  -> GraphqlRemoteDataSource -> GraphQL API
-  -> LocalDataSource -> Drift/SQLite
+- `OIDC_ISSUER`
+- `OIDC_CLIENT_ID`
+- `OIDC_REDIRECT_URI`
+- `OIDC_POST_LOGOUT_REDIRECT_URI`
+- `OIDC_SCOPES`
+
+The default callback scheme is `mvvmstarter`. Interactive AppAuth is
+supported only on Android, iOS, and macOS. Web, Windows, and Linux expose a
+deterministic unsupported state; anonymous network examples remain available.
+
+The adapter uses authorization code + PKCE. It requires an access token,
+expiration, and ID token, then validates nonblank `iss`/`sub` and issuer
+origin before publishing a session.
+
+## Secure Session Behavior
+
+- Access, refresh, and ID tokens live only behind `OidcTokenStore`.
+- Tokens never enter Drift, shared preferences, restoration, logs, errors,
+  snapshots, or rendered UI.
+- Expiring tokens refresh through one shared in-flight Future.
+- Rotated refresh/ID tokens atomically replace the secure stored token set.
+- Missing or failed refresh clears an unusable local session and requires
+  reauthentication.
+- Logout clears secure local state before provider end-session.
+- Provider end-session failure returns a warning while local sign-out remains
+  complete.
+
+The local name auth flow is a demo route gate, not an OIDC substitute or
+security boundary. Production roles must come from a trusted provider/backend
+policy, never a name.
+
+## Configuration Example
+
+```bash
+flutter run \
+  --dart-define=REST_POSTS_URL=https://api.example.com/posts \
+  --dart-define=GRAPHQL_URL=https://api.example.com/graphql \
+  --dart-define=OIDC_ISSUER=https://identity.example.com \
+  --dart-define=OIDC_CLIENT_ID=mvvm-starter-native \
+  --dart-define=OIDC_REDIRECT_URI=mvvmstarter:/oauthredirect \
+  --dart-define=OIDC_POST_LOGOUT_REDIRECT_URI=mvvmstarter:/logout \
+  --dart-define='OIDC_SCOPES=openid profile email offline_access'
 ```
 
-For larger GraphQL features, keep query documents near the remote data source
-or generate typed clients in the data layer. Do not expose GraphQL response
-maps directly to Views.
+The provider must register both callback URIs, and the scheme must match
+Android Gradle plus iOS/macOS Info.plist configuration.
 
-## OIDC Shape
+## Testing And Evidence Boundary
 
-The starter does not ship a real OIDC provider because production OIDC needs an
-issuer, client id, redirect URI, platform callback configuration, token storage
-policy, and provider-specific logout support. It does include the boundary that
-future OIDC work should plug into:
+- Executor tests cover headers, one 401 retry, timeouts, statuses, and GraphQL
+  envelopes.
+- OIDC tests cover cancellation, secure storage, identity validation,
+  single-flight refresh, rotation, restore, and local-first logout.
+- Repository tests prove remote-only isolation, restart fallback, freshness,
+  empty replacement, and public/identity scope separation.
+- ViewModel/widget tests prove independent section results and lifecycle-safe
+  publication.
 
-```text
-Repository/RemoteDataSource -> OidcAuthorization -> OidcTokenProvider
-```
-
-`OidcAuthorization` demonstrates:
-
-- REST `Authorization: Bearer <access token>` headers.
-- GraphQL `Authorization` plus JSON content headers.
-- Refresh before use when the access token is expired or near expiry.
-- Logout delegation to the provider boundary.
-
-## OIDC Token Storage
-
-Do not store refresh tokens in Flutter restoration, `shared_preferences`, or
-plain domain tables. A real OIDC integration should use platform secure storage
-such as Keychain/Keystore through an approved package, or an explicitly
-reviewed encrypted storage design.
-
-Recommended token lifetime:
-
-- Keep access tokens short-lived.
-- Refresh expired access tokens through `OidcTokenProvider.refresh()`.
-- Support refresh token rotation by replacing the stored refresh token after
-  each successful refresh.
-- On logout, clear local token storage first, then call the provider
-  end-session or revocation endpoint when available.
-- Treat failed refresh as signed out unless product requirements define a
-  recoverable re-auth path.
-
-## REST And GraphQL With OIDC
-
-REST example:
-
-```text
-headers = await oidcAuthorization.restHeaders()
-GET /api/items
-Authorization: Bearer <access token>
-```
-
-GraphQL example:
-
-```text
-headers = await oidcAuthorization.graphqlHeaders()
-POST /graphql
-Authorization: Bearer <access token>
-Content-Type: application/json
-```
-
-The transport differs, but the token boundary should not. REST and GraphQL
-remote data sources should both depend on the same auth header abstraction when
-the backend requires OIDC.
-
-## Testing
-
-- Repository tests should prove remote-only paths do not write Drift tables.
-- Repository tests should prove persisted paths write and read local snapshots.
-- OIDC tests should prove active-token headers, refresh-before-use, and logout
-  delegation without requiring a real provider.
-- Widget tests should use fake repositories and avoid live network.
-- Live endpoint checks can be done manually or through narrow smoke commands;
-  they should not make the unit suite flaky.
+No production provider, real-device OIDC flow, or release has been verified.
+The current status is `release pending`.

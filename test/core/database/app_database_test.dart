@@ -46,52 +46,52 @@ void main() {
   test(
     "app_sessions rejects a second singleton row for another user",
     () async {
-    final now = DateTime.utc(2026);
-    final aliceId = await database
-        .into(database.users)
-        .insert(
-          UsersCompanion.insert(
-            uid: "uid-alice",
-            name: "alice",
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-    final bobId = await database
-        .into(database.users)
-        .insert(
-          UsersCompanion.insert(
-            uid: "uid-bob",
-            name: "bob",
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
+      final now = DateTime.utc(2026);
+      final aliceId = await database
+          .into(database.users)
+          .insert(
+            UsersCompanion.insert(
+              uid: "uid-alice",
+              name: "alice",
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+      final bobId = await database
+          .into(database.users)
+          .insert(
+            UsersCompanion.insert(
+              uid: "uid-bob",
+              name: "bob",
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
 
-    await database
-        .into(database.appSessions)
-        .insert(
-          AppSessionsCompanion.insert(
-            id: const Value(1),
-            userId: aliceId,
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-
-    await expectLater(
-      database
+      await database
           .into(database.appSessions)
           .insert(
             AppSessionsCompanion.insert(
               id: const Value(1),
-              userId: bobId,
+              userId: aliceId,
               createdAt: now,
               updatedAt: now,
             ),
-          ),
-      throwsException,
-    );
+          );
+
+      await expectLater(
+        database
+            .into(database.appSessions)
+            .insert(
+              AppSessionsCompanion.insert(
+                id: const Value(1),
+                userId: bobId,
+                createdAt: now,
+                updatedAt: now,
+              ),
+            ),
+        throwsException,
+      );
     },
   );
 
@@ -125,14 +125,15 @@ void main() {
     expect(await database.select(database.appSessions).get(), isEmpty);
   });
 
-  test("rest_posts enforces unique remote ids", () async {
+  test("rest_posts uses a scoped composite primary key", () async {
     final now = DateTime.utc(2026);
 
     await database
         .into(database.restPosts)
         .insert(
           RestPostsCompanion.insert(
-            id: const Value(1),
+            scopeKey: "public",
+            id: 1,
             userId: 1,
             title: "Title",
             body: "Body",
@@ -145,9 +146,26 @@ void main() {
           .into(database.restPosts)
           .insert(
             RestPostsCompanion.insert(
-              id: const Value(1),
+              scopeKey: "oidc:https://issuer.example:alice",
+              id: 1,
               userId: 2,
               title: "Duplicate",
+              body: "Body",
+              fetchedAt: now,
+            ),
+          ),
+      completes,
+    );
+
+    await expectLater(
+      database
+          .into(database.restPosts)
+          .insert(
+            RestPostsCompanion.insert(
+              scopeKey: "public",
+              id: 1,
+              userId: 3,
+              title: "Duplicate public",
               body: "Body",
               fetchedAt: now,
             ),
@@ -156,13 +174,14 @@ void main() {
     );
   });
 
-  test("graphql_countries enforces unique country codes", () async {
+  test("graphql_countries uses a scoped composite primary key", () async {
     final now = DateTime.utc(2026);
 
     await database
         .into(database.graphqlCountries)
         .insert(
           GraphqlCountriesCompanion.insert(
+            scopeKey: "public",
             code: "TR",
             name: "Turkey",
             emoji: "TR",
@@ -176,8 +195,25 @@ void main() {
           .into(database.graphqlCountries)
           .insert(
             GraphqlCountriesCompanion.insert(
+              scopeKey: "oidc:https://issuer.example:alice",
               code: "TR",
               name: "Duplicate",
+              emoji: "TR",
+              capital: const Value("Ankara"),
+              fetchedAt: now,
+            ),
+          ),
+      completes,
+    );
+
+    await expectLater(
+      database
+          .into(database.graphqlCountries)
+          .insert(
+            GraphqlCountriesCompanion.insert(
+              scopeKey: "public",
+              code: "TR",
+              name: "Duplicate public",
               emoji: "TR",
               capital: const Value("Ankara"),
               fetchedAt: now,

@@ -35,13 +35,12 @@ void main() {
         .get();
 
     expect(users, hasLength(3));
-    expect(
-      users.map((row) => row.read<String>("name")),
-      ["alice", "bob", "bob [legacy-3]"],
-    );
-    final migratedUids = users
-        .map((row) => row.read<String>("uid"))
-        .toList();
+    expect(users.map((row) => row.read<String>("name")), [
+      "alice",
+      "bob",
+      "bob [legacy-3]",
+    ]);
+    final migratedUids = users.map((row) => row.read<String>("uid")).toList();
     expect(migratedUids, everyElement(isNotEmpty));
     expect(migratedUids.toSet(), hasLength(migratedUids.length));
 
@@ -52,83 +51,148 @@ void main() {
     expect(sessions.single.read<int>("id"), 1);
     expect(sessions.single.read<int>("user_id"), 3);
 
-    expect(await database.customSelect("PRAGMA foreign_key_check").get(), isEmpty);
+    expect(
+      await database.customSelect("PRAGMA foreign_key_check").get(),
+      isEmpty,
+    );
   });
 
-  test(
-    "version-2 migration keeps users and the latest deterministic session",
-    () async {
-      final executor = NativeDatabase.memory(
-        setup: (database) {
-          database
-            ..execute("PRAGMA foreign_keys = OFF")
-            ..execute(
-              "CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL UNIQUE, name TEXT NOT NULL UNIQUE, is_admin INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)), created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)",
-            )
-            ..execute(
-              "CREATE TABLE app_sessions (id INTEGER NOT NULL CHECK (id = 1), user_id INTEGER NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)",
-            )
-            ..execute(
-              "CREATE TABLE rest_posts (id INTEGER NOT NULL, user_id INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY (id))",
-            )
-            ..execute(
-              "CREATE TABLE graphql_countries (code TEXT NOT NULL, name TEXT NOT NULL, emoji TEXT NOT NULL, capital TEXT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY (code))",
-            )
-            ..execute(
-              "INSERT INTO users (id, uid, name, is_admin, created_at, updated_at) VALUES (1, 'uid-alice', 'alice', 0, 100, 100)",
-            )
-            ..execute(
-              "INSERT INTO users (id, uid, name, is_admin, created_at, updated_at) VALUES (2, 'uid-bob', 'bob', 1, 100, 100)",
-            )
-            ..execute(
-              "INSERT INTO users (id, uid, name, is_admin, created_at, updated_at) VALUES (3, 'uid-charlie', 'charlie', 0, 100, 100)",
-            )
-            ..execute(
-              "INSERT INTO app_sessions (id, user_id, created_at, updated_at) VALUES (1, 1, 100, 100)",
-            )
-            ..execute(
-              "INSERT INTO app_sessions (id, user_id, created_at, updated_at) VALUES (1, 2, 100, 200)",
-            )
-            ..execute(
-              "INSERT INTO app_sessions (id, user_id, created_at, updated_at) VALUES (1, 3, 100, 200)",
-            )
-            ..execute("PRAGMA user_version = 2");
-        },
-      );
-      final database = AppDatabase(executor);
-      addTearDown(database.close);
+  test("version-2 migration keeps users and the latest deterministic session", () async {
+    final executor = NativeDatabase.memory(
+      setup: (database) {
+        database
+          ..execute("PRAGMA foreign_keys = OFF")
+          ..execute(
+            "CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL UNIQUE, name TEXT NOT NULL UNIQUE, is_admin INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)), created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)",
+          )
+          ..execute(
+            "CREATE TABLE app_sessions (id INTEGER NOT NULL CHECK (id = 1), user_id INTEGER NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)",
+          )
+          ..execute(
+            "CREATE TABLE rest_posts (id INTEGER NOT NULL, user_id INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY (id))",
+          )
+          ..execute(
+            "CREATE TABLE graphql_countries (code TEXT NOT NULL, name TEXT NOT NULL, emoji TEXT NOT NULL, capital TEXT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY (code))",
+          )
+          ..execute(
+            "INSERT INTO users (id, uid, name, is_admin, created_at, updated_at) VALUES (1, 'uid-alice', 'alice', 0, 100, 100)",
+          )
+          ..execute(
+            "INSERT INTO users (id, uid, name, is_admin, created_at, updated_at) VALUES (2, 'uid-bob', 'bob', 1, 100, 100)",
+          )
+          ..execute(
+            "INSERT INTO users (id, uid, name, is_admin, created_at, updated_at) VALUES (3, 'uid-charlie', 'charlie', 0, 100, 100)",
+          )
+          ..execute(
+            "INSERT INTO app_sessions (id, user_id, created_at, updated_at) VALUES (1, 1, 100, 100)",
+          )
+          ..execute(
+            "INSERT INTO app_sessions (id, user_id, created_at, updated_at) VALUES (1, 2, 100, 200)",
+          )
+          ..execute(
+            "INSERT INTO app_sessions (id, user_id, created_at, updated_at) VALUES (1, 3, 100, 200)",
+          )
+          ..execute("PRAGMA user_version = 2");
+      },
+    );
+    final database = AppDatabase(executor);
+    addTearDown(database.close);
 
-      final users = await database
-          .customSelect("SELECT id, uid, name FROM users ORDER BY id")
-          .get();
-      expect(users, hasLength(3));
+    final users = await database
+        .customSelect("SELECT id, uid, name FROM users ORDER BY id")
+        .get();
+    expect(users, hasLength(3));
 
-      final sessions = await database
-          .customSelect("SELECT id, user_id FROM app_sessions")
-          .get();
-      expect(sessions, hasLength(1));
-      expect(sessions.single.read<int>("id"), 1);
-      expect(sessions.single.read<int>("user_id"), 3);
+    final sessions = await database
+        .customSelect("SELECT id, user_id FROM app_sessions")
+        .get();
+    expect(sessions, hasLength(1));
+    expect(sessions.single.read<int>("id"), 1);
+    expect(sessions.single.read<int>("user_id"), 3);
 
-      final sessionColumns = await database
-          .customSelect("PRAGMA table_info(app_sessions)")
-          .get();
-      final idColumn = sessionColumns.singleWhere(
-        (row) => row.read<String>("name") == "id",
-      );
-      expect(idColumn.read<int>("pk"), 1);
+    final sessionColumns = await database
+        .customSelect("PRAGMA table_info(app_sessions)")
+        .get();
+    final idColumn = sessionColumns.singleWhere(
+      (row) => row.read<String>("name") == "id",
+    );
+    expect(idColumn.read<int>("pk"), 1);
 
-      final userColumns = await database
-          .customSelect("PRAGMA table_info(users)")
-          .get();
-      expect(
-        userColumns.map((row) => row.read<String>("name")),
-        isNot(contains("is_admin")),
-      );
-      expect(
-        await database.customSelect("PRAGMA foreign_key_check").get(),
-        isEmpty,
-      );
-    },
-  );
+    final userColumns = await database
+        .customSelect("PRAGMA table_info(users)")
+        .get();
+    expect(
+      userColumns.map((row) => row.read<String>("name")),
+      isNot(contains("is_admin")),
+    );
+    expect(
+      await database.customSelect("PRAGMA foreign_key_check").get(),
+      isEmpty,
+    );
+  });
+
+  test("version-3 network snapshots migrate into the public scope", () async {
+    final executor = NativeDatabase.memory(
+      setup: (database) {
+        database
+          ..execute(
+            "CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL UNIQUE, name TEXT NOT NULL UNIQUE, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)",
+          )
+          ..execute(
+            "CREATE TABLE app_sessions (id INTEGER NOT NULL CHECK (id = 1), user_id INTEGER NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, PRIMARY KEY (id))",
+          )
+          ..execute(
+            "CREATE TABLE rest_posts (id INTEGER NOT NULL, user_id INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY (id))",
+          )
+          ..execute(
+            "CREATE TABLE graphql_countries (code TEXT NOT NULL, name TEXT NOT NULL, emoji TEXT NOT NULL, capital TEXT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY (code))",
+          )
+          ..execute(
+            "INSERT INTO rest_posts (id, user_id, title, body, fetched_at) VALUES (7, 1, 'REST title', 'REST body', 100)",
+          )
+          ..execute(
+            "INSERT INTO graphql_countries (code, name, emoji, capital, fetched_at) VALUES ('TR', 'Turkey', 'TR', 'Ankara', 200)",
+          )
+          ..execute("PRAGMA user_version = 3");
+      },
+    );
+    final database = AppDatabase(executor);
+    addTearDown(database.close);
+
+    final restColumns = await database
+        .customSelect("PRAGMA table_info(rest_posts)")
+        .get();
+    final graphqlColumns = await database
+        .customSelect("PRAGMA table_info(graphql_countries)")
+        .get();
+
+    expect(
+      restColumns.map((row) => row.read<String>("name")),
+      contains("scope_key"),
+    );
+    expect(
+      graphqlColumns.map((row) => row.read<String>("name")),
+      contains("scope_key"),
+    );
+
+    final restRows = await database
+        .customSelect(
+          "SELECT scope_key, id, fetched_at FROM rest_posts ORDER BY id",
+        )
+        .get();
+    final graphqlRows = await database
+        .customSelect(
+          "SELECT scope_key, code, fetched_at FROM graphql_countries ORDER BY code",
+        )
+        .get();
+
+    expect(restRows, hasLength(1));
+    expect(restRows.single.read<String>("scope_key"), "public");
+    expect(restRows.single.read<int>("id"), 7);
+    expect(restRows.single.read<int>("fetched_at"), 100);
+    expect(graphqlRows, hasLength(1));
+    expect(graphqlRows.single.read<String>("scope_key"), "public");
+    expect(graphqlRows.single.read<String>("code"), "TR");
+    expect(graphqlRows.single.read<int>("fetched_at"), 200);
+  });
 }

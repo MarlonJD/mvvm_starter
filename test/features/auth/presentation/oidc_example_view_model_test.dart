@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter_test/flutter_test.dart";
 import "package:mvvm_starter/core/errors/app_error.dart";
 import "package:mvvm_starter/core/result/result.dart";
@@ -106,6 +108,27 @@ void main() {
     expect(viewModel.state.value.status, OidcExampleStatus.warning);
     expect(manager.tokenSet.value, isNull);
   });
+
+  test("dispose before sign-in completes does not publish", () async {
+    final client = _CompleterClient();
+    final manager = OidcSessionManager(
+      configuration: configuration,
+      client: client,
+      store: _MemoryStore(),
+    );
+    final viewModel = OidcExampleViewModel(
+      configuration: configuration,
+      sessionManager: manager,
+      platformSupported: true,
+    );
+    addTearDown(manager.dispose);
+
+    final operation = viewModel.signIn();
+    viewModel.dispose();
+    client.signInCompleter.complete(Result.success(OidcSignInCompleted(token)));
+
+    await expectLater(operation, completes);
+  });
 }
 
 final class _MemoryStore implements OidcTokenStore {
@@ -152,4 +175,24 @@ final class _FakeClient implements OidcClient {
     signInCount += 1;
     return signInResult!;
   }
+}
+
+final class _CompleterClient implements OidcClient {
+  final Completer<Result<OidcSignInOutcome>> signInCompleter = Completer();
+
+  @override
+  Future<Result<void>> endSession(
+    OidcConfiguration configuration,
+    String idToken,
+  ) async => const Result.success(null);
+
+  @override
+  Future<Result<OidcTokenSet>> refresh(
+    OidcConfiguration configuration,
+    OidcTokenSet currentTokenSet,
+  ) async => Result.success(currentTokenSet);
+
+  @override
+  Future<Result<OidcSignInOutcome>> signIn(OidcConfiguration configuration) =>
+      signInCompleter.future;
 }

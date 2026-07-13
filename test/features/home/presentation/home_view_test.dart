@@ -1,7 +1,15 @@
+import "dart:async";
+
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:go_router/go_router.dart";
 import "package:mvvm_starter/app/router.dart";
 import "package:mvvm_starter/app/routes.dart";
+import "package:mvvm_starter/core/errors/app_error.dart";
+import "package:mvvm_starter/core/result/result.dart";
+import "package:mvvm_starter/features/auth/data/auth_repository.dart";
+import "package:mvvm_starter/features/auth/domain/user.dart";
 import "package:mvvm_starter/features/auth/presentation/login_view.dart";
 import "package:mvvm_starter/features/auth/presentation/login_view_model.dart";
 import "package:mvvm_starter/features/auth/presentation/signup_view.dart";
@@ -65,9 +73,7 @@ void main() {
   ) async {
     final harness = createTestAuthHarness();
     addTearDown(harness.dispose);
-    final signupViewModel = SignupViewModel(
-      authRepository: harness.repository,
-    );
+    final signupViewModel = SignupViewModel(authRepository: harness.repository);
     addTearDown(signupViewModel.dispose);
     signupViewModel.nameController.value.text = "admin";
     await signupViewModel.createUser();
@@ -104,4 +110,106 @@ void main() {
     expect(find.text("Welcome, admin"), findsOneWidget);
     expect(find.text("Delete All Users"), findsNothing);
   });
+
+  testWidgets("logout failure stays on Home and shows the error", (
+    tester,
+  ) async {
+    final repository = _ControlledLogoutRepository(
+      immediateResult: const Result.failure(
+        AppError.database("errors.database"),
+      ),
+    );
+    final router = _logoutRouter(repository);
+    addTearDown(router.dispose);
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(logoutButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Welcome, alice"), findsOneWidget);
+    expect(find.text("Database error"), findsOneWidget);
+    expect(find.text("Login destination"), findsNothing);
+  });
+
+  testWidgets("logout navigates only after persistence succeeds", (
+    tester,
+  ) async {
+    final completer = Completer<Result<void>>();
+    final repository = _ControlledLogoutRepository(completer: completer);
+    final router = _logoutRouter(repository);
+    addTearDown(router.dispose);
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(logoutButtonKey));
+    await tester.pump();
+
+    expect(find.text("Welcome, alice"), findsOneWidget);
+    expect(find.text("Login destination"), findsNothing);
+
+    completer.complete(const Result.success(null));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Login destination"), findsOneWidget);
+  });
 }
+
+GoRouter _logoutRouter(_ControlledLogoutRepository repository) {
+  return GoRouter(
+    routes: [
+      GoRoute(
+        name: AppRoute.home.name,
+        path: AppRoute.home.path,
+        builder: (context, state) =>
+            HomeView(viewModel: HomeViewModel(authRepository: repository)),
+      ),
+      GoRoute(
+        name: AppRoute.login.name,
+        path: AppRoute.login.path,
+        builder: (context, state) =>
+            const Scaffold(body: Text("Login destination")),
+      ),
+    ],
+  );
+}
+
+final class _ControlledLogoutRepository extends AuthRepository {
+  _ControlledLogoutRepository({this.immediateResult, this.completer})
+    : super.fake();
+
+  final Result<void>? immediateResult;
+  final Completer<Result<void>>? completer;
+  final ValueNotifier<User?> _user = ValueNotifier(_alice);
+
+  @override
+  ValueListenable<User?> get activeUser => _user;
+
+  @override
+  Future<Result<void>> logout() async {
+    final result = immediateResult ?? await completer!.future;
+    if (result.isSuccess) {
+      _user.value = null;
+    }
+    return result;
+  }
+
+  @override
+  void dispose() {
+    _user.dispose();
+    super.dispose();
+  }
+}
+
+final _now = DateTime.utc(2026);
+final _alice = User(
+  id: 1,
+  uid: "uid-alice",
+  name: "alice",
+  createdAt: _now,
+  updatedAt: _now,
+);

@@ -75,29 +75,45 @@ final class OidcExampleViewModel {
   final bool platformSupported;
 
   final ValueNotifier<OidcExampleState> _state;
+  var _operationGeneration = 0;
+  var _disposed = false;
 
   /// Current render-safe state.
   ValueListenable<OidcExampleState> get state => _state;
 
   /// Starts interactive sign-in.
   Future<Result<OidcSignInOutcome>> signIn() async {
-    final unavailable = _unavailableError();
+    final generation = ++_operationGeneration;
+    final unavailable = _unavailableError(generation);
     if (unavailable != null) {
       return Result.failure(unavailable);
     }
-    _state.value = const OidcExampleState(status: OidcExampleStatus.signingIn);
+    _publish(
+      generation,
+      const OidcExampleState(status: OidcExampleStatus.signingIn),
+    );
     final result = await sessionManager.signIn();
+    if (!_canPublish(generation)) {
+      return result;
+    }
     final outcome = result.valueOrNull;
     if (outcome is OidcSignInCompleted) {
-      _state.value = const OidcExampleState(status: OidcExampleStatus.signedIn);
+      _publish(
+        generation,
+        const OidcExampleState(status: OidcExampleStatus.signedIn),
+      );
     } else if (outcome is OidcSignInCancelled) {
-      _state.value = const OidcExampleState(
-        status: OidcExampleStatus.signedOut,
+      _publish(
+        generation,
+        const OidcExampleState(status: OidcExampleStatus.signedOut),
       );
     } else {
-      _state.value = OidcExampleState(
-        status: OidcExampleStatus.warning,
-        error: result.errorOrNull,
+      _publish(
+        generation,
+        OidcExampleState(
+          status: OidcExampleStatus.warning,
+          error: result.errorOrNull,
+        ),
       );
     }
     return result;
@@ -105,54 +121,73 @@ final class OidcExampleViewModel {
 
   /// Explicitly refreshes the current session.
   Future<Result<OidcTokenSet>> refresh() async {
-    final unavailable = _unavailableError();
+    final generation = ++_operationGeneration;
+    final unavailable = _unavailableError(generation);
     if (unavailable != null) {
       return Result.failure(unavailable);
     }
-    _state.value = const OidcExampleState(status: OidcExampleStatus.refreshing);
+    _publish(
+      generation,
+      const OidcExampleState(status: OidcExampleStatus.refreshing),
+    );
     final result = await sessionManager.refresh(force: true);
-    _state.value = result.isSuccess
-        ? const OidcExampleState(status: OidcExampleStatus.signedIn)
-        : OidcExampleState(
-            status: OidcExampleStatus.warning,
-            error: result.errorOrNull,
-          );
+    if (_canPublish(generation)) {
+      _state.value = result.isSuccess
+          ? const OidcExampleState(status: OidcExampleStatus.signedIn)
+          : OidcExampleState(
+              status: OidcExampleStatus.warning,
+              error: result.errorOrNull,
+            );
+    }
     return result;
   }
 
   /// Logs out locally before attempting provider end-session.
   Future<Result<void>> logout() async {
-    final unavailable = _unavailableError();
+    final generation = ++_operationGeneration;
+    final unavailable = _unavailableError(generation);
     if (unavailable != null) {
       return Result.failure(unavailable);
     }
-    _state.value = const OidcExampleState(status: OidcExampleStatus.signingOut);
+    _publish(
+      generation,
+      const OidcExampleState(status: OidcExampleStatus.signingOut),
+    );
     final result = await sessionManager.logout();
-    _state.value = result.isSuccess
-        ? const OidcExampleState(status: OidcExampleStatus.signedOut)
-        : OidcExampleState(
-            status: OidcExampleStatus.warning,
-            error: result.errorOrNull,
-          );
+    if (_canPublish(generation)) {
+      _state.value = result.isSuccess
+          ? const OidcExampleState(status: OidcExampleStatus.signedOut)
+          : OidcExampleState(
+              status: OidcExampleStatus.warning,
+              error: result.errorOrNull,
+            );
+    }
     return result;
   }
 
   /// Releases listeners and render state.
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    _operationGeneration += 1;
     sessionManager.tokenSet.removeListener(_handleSessionChanged);
     _state.dispose();
   }
 
-  AppError? _unavailableError() {
+  AppError? _unavailableError(int generation) {
     if (!configuration.isConfigured) {
-      _state.value = const OidcExampleState(
-        status: OidcExampleStatus.unconfigured,
+      _publish(
+        generation,
+        const OidcExampleState(status: OidcExampleStatus.unconfigured),
       );
       return const AppError.notFound("auth.oidc.notConfigured");
     }
     if (!platformSupported) {
-      _state.value = const OidcExampleState(
-        status: OidcExampleStatus.unsupported,
+      _publish(
+        generation,
+        const OidcExampleState(status: OidcExampleStatus.unsupported),
       );
       return const AppError.notFound("auth.oidc.unsupportedPlatform");
     }
@@ -160,10 +195,29 @@ final class OidcExampleViewModel {
   }
 
   void _handleSessionChanged() {
+    if (_disposed || _isBusy(_state.value.status)) {
+      return;
+    }
     final status = sessionManager.tokenSet.value == null
         ? OidcExampleStatus.signedOut
         : OidcExampleStatus.signedIn;
     _state.value = OidcExampleState(status: status);
+  }
+
+  bool _canPublish(int generation) {
+    return !_disposed && generation == _operationGeneration;
+  }
+
+  void _publish(int generation, OidcExampleState state) {
+    if (_canPublish(generation)) {
+      _state.value = state;
+    }
+  }
+
+  bool _isBusy(OidcExampleStatus status) {
+    return status == OidcExampleStatus.signingIn ||
+        status == OidcExampleStatus.refreshing ||
+        status == OidcExampleStatus.signingOut;
   }
 
   static OidcExampleState _initialState(

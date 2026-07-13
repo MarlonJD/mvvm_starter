@@ -6,7 +6,7 @@ import "package:mvvm_starter/features/auth/domain/user.dart";
 import "package:uuid/uuid.dart";
 
 /// Repository for local auth and session behavior.
-final class AuthRepository {
+class AuthRepository {
   /// Creates an auth repository.
   AuthRepository({
     required this._localDataSource,
@@ -15,11 +15,20 @@ final class AuthRepository {
   }) : _uidFactory = uidFactory ?? const Uuid().v4,
        _now = now ?? DateTime.now;
 
-  final AuthLocalDataSource _localDataSource;
+  /// Creates a test subclass base without a persistence adapter.
+  AuthRepository.fake()
+    : _localDataSource = null,
+      _uidFactory = const Uuid().v4,
+      _now = DateTime.now;
+
+  final AuthLocalDataSource? _localDataSource;
   final String Function() _uidFactory;
   final DateTime Function() _now;
 
   final ValueNotifier<User?> _activeUser = ValueNotifier<User?>(null);
+
+  AuthLocalDataSource get _local =>
+      _localDataSource ?? (throw StateError("Missing auth local data source"));
 
   /// Active user listenable for Views and router refresh.
   ValueListenable<User?> get activeUser => _activeUser;
@@ -29,7 +38,7 @@ final class AuthRepository {
 
   /// Restores the active session from local storage.
   Future<User?> restoreSession() async {
-    final user = await _localDataSource.activeUser();
+    final user = await _local.activeUser();
     _activeUser.value = user;
     return user;
   }
@@ -42,7 +51,7 @@ final class AuthRepository {
     }
 
     try {
-      final user = await _localDataSource.createUserAndSession(
+      final user = await _local.createUserAndSession(
         uid: _uidFactory(),
         name: trimmedName,
         now: _now(),
@@ -62,11 +71,11 @@ final class AuthRepository {
     }
 
     try {
-      final user = await _localDataSource.findUserByName(trimmedName);
+      final user = await _local.findUserByName(trimmedName);
       if (user == null) {
         return const Result.failure(AppError.notFound("auth.userNotFound"));
       }
-      await _localDataSource.replaceSession(userId: user.id, now: _now());
+      await _local.replaceSession(userId: user.id, now: _now());
       _activeUser.value = user;
       return Result.success(user);
     } on Exception catch (error) {
@@ -77,7 +86,7 @@ final class AuthRepository {
   /// Logs out the active user.
   Future<Result<void>> logout() async {
     try {
-      await _localDataSource.clearSession();
+      await _local.clearSession();
       _activeUser.value = null;
       return const Result.success(null);
     } on Exception catch (error) {
@@ -88,7 +97,7 @@ final class AuthRepository {
   /// Deletes one user.
   Future<Result<void>> deleteUser(User user) async {
     try {
-      await _localDataSource.deleteUser(user);
+      await _local.deleteUser(user);
       if (_activeUser.value?.id == user.id) {
         _activeUser.value = null;
       }
@@ -99,17 +108,17 @@ final class AuthRepository {
   }
 
   /// Returns all users.
-  Future<List<User>> users() => _localDataSource.users();
+  Future<List<User>> users() => _local.users();
 
   /// Watches all users.
-  Stream<List<User>> watchUsers() => _localDataSource.watchUsers();
+  Stream<List<User>> watchUsers() => _local.watchUsers();
 
   /// Returns active session user ids.
-  Future<List<int>> sessionUserIds() => _localDataSource.sessionUserIds();
+  Future<List<int>> sessionUserIds() => _local.sessionUserIds();
 
   /// Watches active session user ids.
   Stream<List<int>> watchSessionUserIds() {
-    return _localDataSource.watchSessionUserIds();
+    return _local.watchSessionUserIds();
   }
 
   /// Releases repository resources.
